@@ -1,4 +1,5 @@
-﻿using MultimodalSharp.Abstractions.Interfaces;
+﻿using MultimodalSharp.Abstractions.Entities;
+using MultimodalSharp.Abstractions.Interfaces;
 using MultimodalSharp.Helper;
 using MultimodalSharp.Ollama.Models.Entities;
 using System;
@@ -14,21 +15,18 @@ using static MultimodalSharp.Ollama.Models.Entities.OllamaResponses;
 
 namespace MultimodalSharp.Ollama.Services
 {
-    public class OllamaTextClient : ITTLTextGeneration
+    public class OllamaTextClient : TLLSendBaseClient<OllamaGenerateRequestModel, OllamaGenerateResponseModel>, ITTLTextGeneration
     {
-        private HttpClient Http { get; set; }
-        private string BaseUrl { get; set; }
-        private String ModelName { get; set; }
-        public OllamaTextClient(OllamaInitDataModel OllamaInitData)
+        public OllamaTextClient(OllamaInitDataModel InitData) : base(InitData.ModelName,InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/generate")
         {
-            this.Http = OllamaInitData.HttpClient;
-            this.BaseUrl = $"http://{OllamaInitData.ServerIP.Address}:{OllamaInitData.ServerIP.Port}/api/generate";
-            this.ModelName = OllamaInitData.ModelName;
         }
+        /// <summary>
+        /// 发文本消息 一次性接收所有回复文本
+        /// </summary>
 
         public async Task<string> SendMessageAsync(string Message)
         {
-            var response = await SendMessageAsync(new OllamaGenerateRequestModel()
+            var response = await RequestMessageAsync(new OllamaGenerateRequestModel()
             {
                 Model = ModelName,
                 Prompt = Message,
@@ -36,9 +34,13 @@ namespace MultimodalSharp.Ollama.Services
             return response.Response;
         }
 
+        /// <summary>
+        /// 发文本消息 以流式方式接收回复文本
+        /// </summary>
+        /// <param name="Response">每次收到文本后的回调</param>
         public async Task SendMessageAsync(string Message, Action<string> Response)
         {
-            await SendMessageStreamAsync(new OllamaGenerateRequestModel()
+            await base.RequestMessageStreamAsync(new OllamaGenerateRequestModel()
             {
                 Model = ModelName,
                 Prompt = Message,
@@ -49,43 +51,5 @@ namespace MultimodalSharp.Ollama.Services
             });
         }
 
-
-        public async Task<OllamaGenerateResponseModel> SendMessageAsync(OllamaGenerateRequestModel RequestData)
-        {
-           return await HttpHelper.PostData<OllamaGenerateResponseModel>(BaseUrl, HttpHelper.CreateJsonContent(RequestData, true));
-        }
-        public async Task SendMessageStreamAsync(OllamaGenerateRequestModel RequestData, Action<OllamaGenerateStreamResponseModel> Response)
-        {
-           await HttpHelper.PostStream<OllamaGenerateStreamResponseModel>(BaseUrl, HttpHelper.CreateJsonContent(RequestData, true), data =>
-            {
-                Response.Invoke(data);
-                return data.Done;
-            });
-        }
-
-        //public async Task<OllamaGenerateResponseModel> SendMessageAsync(OllamaGenerateRequestModel RequestData)
-        //{
-        //    var content = HttpHelper.CreateJsonContent(RequestData, true);
-        //    var response = await Http.PostAsync(BaseUrl, content);
-        //    var json = await response.Content.ReadAsStringAsync();
-        //    var data = JsonSerializer.Deserialize<OllamaGenerateResponseModel>(json);
-        //    return data;
-        //}
-        //public async Task SendMessageStreamAsync(OllamaGenerateRequestModel RequestData, Action<OllamaGenerateStreamResponseModel> Response)
-        //{
-        //    var content = HttpHelper.CreateJsonContent(RequestData, true);
-        //    var send=await Http.SendAsync(new HttpRequestMessage(HttpMethod.Post, BaseUrl) { Content = content }, HttpCompletionOption.ResponseHeadersRead);
-        //    var stream=send.Content.ReadAsStream();
-        //    StreamReader reader = new StreamReader(stream);
-
-        //    while (true)
-        //    {
-        //        var line = reader.ReadLine();
-        //        var model = JsonSerializer.Deserialize<OllamaGenerateStreamResponseModel>(line);
-        //        Response.Invoke(model);
-        //        if (model.Done) break;
-        //    }
-
-        //}
     }
 }

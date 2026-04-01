@@ -13,7 +13,7 @@ namespace MultimodalSharp.Helper
 {
     public class HttpHelper
     {
-        public delegate bool HttpResponseStreamData<ResponseStreamDataType>(ResponseStreamDataType DataType);
+        public delegate void HttpResponseStreamData<ResponseStreamDataType>(ResponseStreamDataType StreamRead);
         public static readonly HttpClient Http = null;
         static HttpHelper()
         {
@@ -51,7 +51,7 @@ namespace MultimodalSharp.Helper
         /// <param name="Url">地址</param>
         /// <param name="Content">携带Content</param>
         /// <returns></returns>
-        public static async Task<ResponseDataType> PostData<ResponseDataType>(String Url, HttpContent Content)
+        public static async Task<ResponseDataType> PostData<ResponseDataType>(HttpClient Http,String Url, HttpContent Content)
         {
             var response = await Http.PostAsync(Url, Content);
             var json = await response.Content.ReadAsStringAsync();
@@ -66,7 +66,7 @@ namespace MultimodalSharp.Helper
         /// <param name="Content">携带Content</param>
         /// <param name="Response">返回回调 ，如果返回true则不继续读取，否则持续读取目标返回的Stream</param>
         /// <returns></returns>
-        public static async Task PostStream<ResponseStreamDataType>(String Url, HttpContent Content, HttpResponseStreamData<ResponseStreamDataType> Response)
+        public static async Task PostStream<ResponseStreamDataType>(HttpClient Http, String Url, HttpContent Content, Action<ResponseStreamDataType> Response)
         {
             var send = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Post, Url) { Content = Content }, HttpCompletionOption.ResponseHeadersRead);
             var stream = send.Content.ReadAsStream();
@@ -75,8 +75,9 @@ namespace MultimodalSharp.Helper
             while (true)
             {
                 var line = reader.ReadLine();
+                if (line == null) break;
                 var model = JsonSerializer.Deserialize<ResponseStreamDataType>(line);
-                if (Response(model)) break;
+                Response(model);
             }
 
         }
