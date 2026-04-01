@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="MultimodalSharp.Test/MultimodalSharp.Test.csproj" />
   <Project Path="MultimodalSharp/MultimodalSharp.csproj" />
 </Solution>

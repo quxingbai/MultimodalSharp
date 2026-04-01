@@ -19,11 +19,22 @@ namespace MultimodalSharp.Helper
             return Http;
         }
         /// <summary>
-        /// 创建一个JsonContent
+        /// 做一个Json
         /// </summary>
-        public static StringContent CreateJsonContent(object Model)
+        /// <param name="Model">数据源</param>
+        /// <param name="RemoveNullValue">是否从Json中删掉为Null的属性</param>
+        public static StringContent CreateJsonContent(object Model,bool RemoveNullValue)
         {
-            string json = System.Text.Json.JsonSerializer.Serialize(Model);
+            Dictionary<string, object> d = new();
+            foreach (var i in Model.GetType().GetProperties())
+            {
+                var val = i.GetValue(Model);
+                if (val!=null)
+                {
+                    d.Add(i.Name, val);
+                }
+            }
+            string json = System.Text.Json.JsonSerializer.Serialize(d);
             return new StringContent(json, Encoding.UTF8, "application/json");
         }
     }

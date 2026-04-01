@@ -10,7 +10,7 @@ namespace MultimodalSharp.Ollama.Models.Entities.Responses
     public class OllamaChatResponseModel : OllamaResponseBaseModel
     {
         [JsonPropertyName("message")]
-        public ChatMessageModel Message { get; set; }
+        public OllamaChatMessageModel Message { get; set; }
 
         [JsonPropertyName("load_duration")]
         public long LoadDurationNanoseconds { get; set; }

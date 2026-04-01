@@ -10,7 +10,7 @@ namespace MultimodalSharp.Ollama.Models.Entities.Requests
     /// <summary>
     /// 文本生成请求模型
     /// </summary>
-    public class OllamaTextGenerateRequestModel : OllamaRequestBaseModel
+    public class OllamaGenerateRequestModel : OllamaRequestBaseModel
     {
         [JsonPropertyName("prompt")]
         public string Prompt { get; set; }

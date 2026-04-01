@@ -11,5 +11,6 @@ namespace MultimodalSharp.Ollama.Models.Entities
     {
         public IPEndPoint ServerIP { get; set; }
         public HttpClient HttpClient { get; set; }
+        public String ModelName { get; set; }
     }
 }
