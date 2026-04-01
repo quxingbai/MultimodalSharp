@@ -15,3 +15,4 @@ while (true)
     });
 }
 
+ollama

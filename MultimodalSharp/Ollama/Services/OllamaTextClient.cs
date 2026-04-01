@@ -1,8 +1,6 @@
 ﻿using MultimodalSharp.Abstractions.Interfaces;
 using MultimodalSharp.Helper;
 using MultimodalSharp.Ollama.Models.Entities;
-using MultimodalSharp.Ollama.Models.Entities.Requests;
-using MultimodalSharp.Ollama.Models.Entities.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +9,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using static MultimodalSharp.Ollama.Models.Entities.OllamaRequests;
+using static MultimodalSharp.Ollama.Models.Entities.OllamaResponses;
 
 namespace MultimodalSharp.Ollama.Services
 {
