@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using static MultimodalSharp.Helper.HttpHelper;
+using static MultimodalSharp.Ollama.Models.Entities.OllamaRequests;
+using static MultimodalSharp.Ollama.Models.Entities.OllamaResponses;
 
 namespace MultimodalSharp.Helper
 {
     public class HttpHelper
     {
+        public delegate bool HttpResponseStreamData<ResponseStreamDataType>(ResponseStreamDataType DataType);
         public static readonly HttpClient Http = null;
         static HttpHelper()
         {
@@ -23,13 +29,13 @@ namespace MultimodalSharp.Helper
         /// </summary>
         /// <param name="Model">数据源</param>
         /// <param name="RemoveNullValue">是否从Json中删掉为Null的属性</param>
-        public static StringContent CreateJsonContent(object Model,bool RemoveNullValue)
+        public static StringContent CreateJsonContent(object Model, bool RemoveNullValue)
         {
             Dictionary<string, object> d = new();
             foreach (var i in Model.GetType().GetProperties())
             {
                 var val = i.GetValue(Model);
-                if (val!=null)
+                if (val != null)
                 {
                     d.Add(i.Name, val);
                 }
@@ -37,5 +43,43 @@ namespace MultimodalSharp.Helper
             string json = System.Text.Json.JsonSerializer.Serialize(d);
             return new StringContent(json, Encoding.UTF8, "application/json");
         }
+
+        /// <summary>
+        /// Post数据并等待结果返回 适用于一次性返回的接口
+        /// </summary>
+        /// <typeparam name="ResponseDataType">返回数据类型</typeparam>
+        /// <param name="Url">地址</param>
+        /// <param name="Content">携带Content</param>
+        /// <returns></returns>
+        public static async Task<ResponseDataType> PostData<ResponseDataType>(String Url, HttpContent Content)
+        {
+            var response = await Http.PostAsync(Url, Content);
+            var json = await response.Content.ReadAsStringAsync();
+            var data = JsonSerializer.Deserialize<ResponseDataType>(json);
+            return data;
+        }
+        /// <summary>
+        /// Post数据并以流的形式等待结果返回 适用于流式接口 只要接口一直在返回数据就会一直在Response里返回 直到Response里返回true为止
+        /// </summary>
+        /// <typeparam name="ResponseStreamDataType">返回流数据类型</typeparam>
+        /// <param name="Url">地址</param>
+        /// <param name="Content">携带Content</param>
+        /// <param name="Response">返回回调 ，如果返回true则不继续读取，否则持续读取目标返回的Stream</param>
+        /// <returns></returns>
+        public static async Task PostStream<ResponseStreamDataType>(String Url, HttpContent Content, HttpResponseStreamData<ResponseStreamDataType> Response)
+        {
+            var send = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Post, Url) { Content = Content }, HttpCompletionOption.ResponseHeadersRead);
+            var stream = send.Content.ReadAsStream();
+            StreamReader reader = new StreamReader(stream);
+
+            while (true)
+            {
+                var line = reader.ReadLine();
+                var model = JsonSerializer.Deserialize<ResponseStreamDataType>(line);
+                if (Response(model)) break;
+            }
+
+        }
     }
+
 }

@@ -48,29 +48,44 @@ namespace MultimodalSharp.Ollama.Services
                 Response.Invoke(data.Response);
             });
         }
+
+
         public async Task<OllamaGenerateResponseModel> SendMessageAsync(OllamaGenerateRequestModel RequestData)
         {
-            var content = HttpHelper.CreateJsonContent(RequestData, true);
-            var response = await Http.PostAsync(BaseUrl, content);
-            var json = await response.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<OllamaGenerateResponseModel>(json);
-            return data;
+           return await HttpHelper.PostData<OllamaGenerateResponseModel>(BaseUrl, HttpHelper.CreateJsonContent(RequestData, true));
         }
         public async Task SendMessageStreamAsync(OllamaGenerateRequestModel RequestData, Action<OllamaGenerateStreamResponseModel> Response)
         {
-            var content = HttpHelper.CreateJsonContent(RequestData, true);
-            var send=await Http.SendAsync(new HttpRequestMessage(HttpMethod.Post, BaseUrl) { Content = content }, HttpCompletionOption.ResponseHeadersRead);
-            var stream=send.Content.ReadAsStream();
-            StreamReader reader = new StreamReader(stream);
-
-            while (true)
+           await HttpHelper.PostStream<OllamaGenerateStreamResponseModel>(BaseUrl, HttpHelper.CreateJsonContent(RequestData, true), data =>
             {
-                var line = reader.ReadLine();
-                var model = JsonSerializer.Deserialize<OllamaGenerateStreamResponseModel>(line);
-                Response.Invoke(model);
-                if (model.Done) break;
-            }
-
+                Response.Invoke(data);
+                return data.Done;
+            });
         }
+
+        //public async Task<OllamaGenerateResponseModel> SendMessageAsync(OllamaGenerateRequestModel RequestData)
+        //{
+        //    var content = HttpHelper.CreateJsonContent(RequestData, true);
+        //    var response = await Http.PostAsync(BaseUrl, content);
+        //    var json = await response.Content.ReadAsStringAsync();
+        //    var data = JsonSerializer.Deserialize<OllamaGenerateResponseModel>(json);
+        //    return data;
+        //}
+        //public async Task SendMessageStreamAsync(OllamaGenerateRequestModel RequestData, Action<OllamaGenerateStreamResponseModel> Response)
+        //{
+        //    var content = HttpHelper.CreateJsonContent(RequestData, true);
+        //    var send=await Http.SendAsync(new HttpRequestMessage(HttpMethod.Post, BaseUrl) { Content = content }, HttpCompletionOption.ResponseHeadersRead);
+        //    var stream=send.Content.ReadAsStream();
+        //    StreamReader reader = new StreamReader(stream);
+
+        //    while (true)
+        //    {
+        //        var line = reader.ReadLine();
+        //        var model = JsonSerializer.Deserialize<OllamaGenerateStreamResponseModel>(line);
+        //        Response.Invoke(model);
+        //        if (model.Done) break;
+        //    }
+
+        //}
     }
 }
