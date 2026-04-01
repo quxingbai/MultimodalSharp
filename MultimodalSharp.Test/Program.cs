@@ -2,13 +2,16 @@
 using System.Net;
 
 var client = new OllamaTextClient(new() { HttpClient = new(), ModelName = "deepseek-r1", ServerIP = new IPEndPoint(IPAddress.Loopback, 12344) });
-var msg = client.SendMessageAsync("你好，现在什么时间了");
-msg.ContinueWith(w =>
+var msg = client.SendMessageAsync("帮我写一个冒泡排序法 C#的", msg =>
 {
-    Console.WriteLine(msg.Result);
+    Console.Write(msg);
 });
+
 while (true)
 {
-    Console.ReadKey();
+     client.SendMessageAsync(Console.ReadLine(), msg =>
+    {
+        Console.Write(msg);
+    });
 }
 
