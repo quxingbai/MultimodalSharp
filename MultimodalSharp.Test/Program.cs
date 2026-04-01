@@ -1,17 +1,23 @@
 ﻿using MultimodalSharp.Ollama.Services;
 using System.Net;
 
-var client = new OllamaTextClient(new() { HttpClient = new(), ModelName = "deepseek-r1", ServerIP = new IPEndPoint(IPAddress.Loopback, 12344) });
-var msg = client.SendMessageAsync("帮我写一个冒泡排序法 C#的", msg =>
+var client = new OllamaChatClient(new() { HttpClient = new(), ModelName = "deepseek-r1", ServerIP = new IPEndPoint(IPAddress.Loopback, 12344) });
+var msg = client.SendMessageAsync("帮我写一个冒泡排序法 C#的", (msg,last) =>
 {
     Console.Write(msg);
+    if (last)
+    {
+        Console.WriteLine("最后一行！");
+    }
 });
+
+//client.SendMessageAsync("帮我写一个冒泡排序法 C#的");
 
 while (true)
 {
-     client.SendMessageAsync(Console.ReadLine(), msg =>
-    {
-        Console.Write(msg);
-    });
+    client.SendMessageAsync(Console.ReadLine(), (msg,last) =>
+   {
+       Console.Write(msg);
+   });
 }
 

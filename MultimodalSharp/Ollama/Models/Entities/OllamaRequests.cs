@@ -12,7 +12,7 @@ namespace MultimodalSharp.Ollama.Models.Entities
         /// <summary>
         /// 对话消息模型
         /// </summary>
-        public class OlllamaChatMessageRequest
+        public class OlllamaChatRoleMessage
         {
             [JsonPropertyName("role")]
             public string Role { get; set; }
@@ -22,6 +22,23 @@ namespace MultimodalSharp.Ollama.Models.Entities
 
             [JsonPropertyName("images")]
             public List<string> Images { get; set; }
+
+            public static OlllamaChatRoleMessage CreateUserMessage(string Content)
+            {
+                return new OlllamaChatRoleMessage()
+                {
+                    Role = "user",
+                    Content = Content,
+                };
+            }
+            public static OlllamaChatRoleMessage CreateSystemMessage(string Content)
+            {
+                return new OlllamaChatRoleMessage()
+                {
+                    Role = "system",
+                    Content = Content,
+                };
+            }
         }
 
         /// <summary>
@@ -43,7 +60,6 @@ namespace MultimodalSharp.Ollama.Models.Entities
 
             protected OllamaRequestBaseModel()
             {
-                Options = new Dictionary<string, object>();
             }
         }
 
@@ -107,7 +123,7 @@ namespace MultimodalSharp.Ollama.Models.Entities
         public class OllamaChatRequestModel : OllamaRequestBaseModel
         {
             [JsonPropertyName("messages")]
-            public List<OlllamaChatMessageRequest> Messages { get; set; }
+            public IEnumerable<OlllamaChatRoleMessage> Messages { get; set; }
 
             [JsonPropertyName("tools")]
             public List<object> Tools { get; set; }
@@ -121,7 +137,6 @@ namespace MultimodalSharp.Ollama.Models.Entities
 
             public OllamaChatRequestModel()
             {
-                Messages = new List<OlllamaChatMessageRequest>();
             }
         }
     }

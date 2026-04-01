@@ -14,9 +14,45 @@ namespace MultimodalSharp.Ollama.Services
 {
     public class OllamaChatClient : TLLSendBaseClient<OllamaChatRequestModel, OllamaChatResponseModel>, ITTLChatCompletion
     {
-        public List<OllamaChatMessageModel> ChatMessages = new();
+        public List<OlllamaChatRoleMessage> ChatMessages = new();
         public OllamaChatClient(OllamaInitDataModel InitData) : base(InitData.ModelName, InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/chat")
         {
+        }
+
+
+        public async Task<string> SendMessageAsync(string Message)
+        {
+            var data = await RequestMessageAsync(new OllamaChatRequestModel()
+            {
+                Model = ModelName,
+                Messages = AppendChatMessage(OlllamaChatRoleMessage.CreateUserMessage(Message))
+            });
+            var message = new OlllamaChatRoleMessage()
+            {
+                Role = data.Message.Role,
+                Content = data.Message.Content
+            };
+            AppendChatMessage(message);
+            return message.Content;
+        }
+
+        public async Task SendMessageAsync(string Message, StreamMessageData Response)
+        {
+            StringBuilder messageStringB = new();
+            string? role = null;
+            await RequestMessageStreamAsync(new OllamaChatRequestModel()
+            {
+                Model = ModelName,
+                Stream = true,
+                Messages = AppendChatMessage(OlllamaChatRoleMessage.CreateUserMessage(Message))
+            }, (data) =>
+            {
+                var msg = data.Message.Content;
+                if (role == null) role = data.Message.Role;
+                messageStringB.Append(msg);
+                Response(msg,data.Done);
+            });
+            AppendChatMessage(new() { Role = role, Content = messageStringB.ToString() });
         }
 
 
@@ -24,19 +60,16 @@ namespace MultimodalSharp.Ollama.Services
         /// <summary>
         /// 获取上下文历史
         /// </summary>
-        public virtual IEnumerable<OllamaChatMessageModel> GetChatMessages()
+        public virtual IEnumerable<OlllamaChatRoleMessage> GetChatMessages()
         {
             return ChatMessages;
         }
-
-        public Task<string> SendMessageAsync(string Message)
+        public IEnumerable<OlllamaChatRoleMessage> AppendChatMessage(OlllamaChatRoleMessage Msg)
         {
-            throw new NotImplementedException();
+            ChatMessages.Add(Msg);
+            return ChatMessages;
+
         }
 
-        public Task SendMessageAsync(string Message, Action<string> Response)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

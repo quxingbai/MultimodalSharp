@@ -10,12 +10,13 @@ using static System.Net.WebRequestMethods;
 
 namespace MultimodalSharp.Abstractions.Entities
 {
+    public delegate void StreamMessageData(String Message, bool IsLastMessage);
     public class TLLSendBaseClient<RequestDataType, ResponseDataType>
     {
         protected HttpClient Http = null;
         protected string BaseUrl = null;
         protected String ModelName = null;
-        public TLLSendBaseClient(String ModelName,HttpClient Http, String BaseUrl)
+        public TLLSendBaseClient(String ModelName, HttpClient Http, String BaseUrl)
         {
             this.Http = Http;
             this.BaseUrl = BaseUrl;

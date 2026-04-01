@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MultimodalSharp.Abstractions.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace MultimodalSharp.Abstractions.Interfaces
     internal interface ITTLChatCompletion
     {
         public Task<string> SendMessageAsync(string Message);
-        public Task SendMessageAsync(string Message, Action<string> Response);
+        public Task SendMessageAsync(string Message, StreamMessageData Response);
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MultimodalSharp.Abstractions.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,6 @@ namespace MultimodalSharp.Abstractions.Interfaces
         /// <param name="Message">发送</param>
         /// <param name="Response">流读出数据就会在这里返回</param>
         /// <returns></returns>
-        public Task SendMessageAsync(string Message, Action<string> Response);
+        public Task SendMessageAsync(string Message, StreamMessageData Response);
     }
 }

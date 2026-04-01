@@ -17,7 +17,7 @@ namespace MultimodalSharp.Ollama.Services
 {
     public class OllamaTextClient : TLLSendBaseClient<OllamaGenerateRequestModel, OllamaGenerateResponseModel>, ITTLTextGeneration
     {
-        public OllamaTextClient(OllamaInitDataModel InitData) : base(InitData.ModelName,InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/generate")
+        public OllamaTextClient(OllamaInitDataModel InitData) : base(InitData.ModelName, InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/generate")
         {
         }
         /// <summary>
@@ -38,7 +38,7 @@ namespace MultimodalSharp.Ollama.Services
         /// 发文本消息 以流式方式接收回复文本
         /// </summary>
         /// <param name="Response">每次收到文本后的回调</param>
-        public async Task SendMessageAsync(string Message, Action<string> Response)
+        public async Task SendMessageAsync(string Message, StreamMessageData Response)
         {
             await base.RequestMessageStreamAsync(new OllamaGenerateRequestModel()
             {
@@ -47,7 +47,7 @@ namespace MultimodalSharp.Ollama.Services
                 Stream = true
             }, data =>
             {
-                Response.Invoke(data.Response);
+                Response(data.Response, data.Done);
             });
         }
 
