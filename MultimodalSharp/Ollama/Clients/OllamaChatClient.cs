@@ -22,7 +22,7 @@ namespace MultimodalSharp.Ollama.Clients
 
         public async Task<string> RequestMessageAsync(string Message)
         {
-            var data = await RequestMessageAsync(new OllamaChatRequestModel()
+            var data = await PostRequestMessageAsync(new OllamaChatRequestModel()
             {
                 Model = ModelName,
                 Messages = AppendChatMessage(OlllamaChatRoleMessage.CreateUserMessage(Message))
@@ -40,7 +40,7 @@ namespace MultimodalSharp.Ollama.Clients
         {
             StringBuilder messageStringB = new();
             string? role = null;
-            await RequestMessageStreamAsync(new OllamaChatRequestModel()
+            await PostRequestMessageStreamAsync(new OllamaChatRequestModel()
             {
                 Model = ModelName,
                 Stream = true,

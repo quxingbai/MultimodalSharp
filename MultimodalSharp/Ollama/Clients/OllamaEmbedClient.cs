@@ -37,7 +37,7 @@ namespace MultimodalSharp.Ollama.Clients
 
         public async Task<float[][]> RequestEmbeddingAsync(params string[] Texts)
         {
-            var data = await RequestMessageAsync(new OllamaEmbedRequestModel()
+            var data = await PostRequestMessageAsync(new OllamaEmbedRequestModel()
             {
                 Model = ModelName,
                 Input = Texts

@@ -92,6 +92,14 @@ namespace MultimodalSharp.Helper
             var data = JsonSerializer.Deserialize<ResponseDataType>(json);
             return data;
         }
+        public static async Task<ResponseDataType> GetData<ResponseDataType>(HttpClient Http, String Url, HttpContent Content)
+        {
+            var response = await Http.GetAsync(Url);
+            var json = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
+            var data = JsonSerializer.Deserialize<ResponseDataType>(json);
+            return data;
+        }
         /// <summary>
         /// Post数据并以流的形式等待结果返回 适用于流式接口 只要接口一直在返回数据就会一直在Response里返回 直到Response里返回true为止
         /// </summary>

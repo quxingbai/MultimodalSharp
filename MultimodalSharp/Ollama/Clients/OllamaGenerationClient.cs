@@ -26,7 +26,7 @@ namespace MultimodalSharp.Ollama.Clients
 
         public async Task<string> RequestMessageAsync(string Message)
         {
-            var response = await RequestMessageAsync(new OllamaGenerateRequestModel()
+            var response = await PostRequestMessageAsync(new OllamaGenerateRequestModel()
             {
                 Model = ModelName,
                 Prompt = Message,
@@ -40,7 +40,7 @@ namespace MultimodalSharp.Ollama.Clients
         /// <param name="Response">每次收到文本后的回调</param>
         public async Task RequestMessageAsync(string Message, StreamMessageData Response)
         {
-            await base.RequestMessageStreamAsync(new OllamaGenerateRequestModel()
+            await base.PostRequestMessageStreamAsync(new OllamaGenerateRequestModel()
             {
                 Model = ModelName,
                 Prompt = Message,
