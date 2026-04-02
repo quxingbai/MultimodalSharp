@@ -99,7 +99,7 @@ namespace MultimodalSharp.Ollama.Models.Entities
             public string Model { get; set; }
 
             [JsonPropertyName("input")]
-            public object Input { get; set; }  // 可以是 string 或 List<string>
+            public string[] Input { get; set; }  // 可以是 string 或 List<string>
 
             [JsonPropertyName("truncate")]
             public bool? Truncate { get; set; }
@@ -112,7 +112,6 @@ namespace MultimodalSharp.Ollama.Models.Entities
 
             public OllamaEmbedRequestModel()
             {
-                Options = new Dictionary<string, object>();
             }
         }
 

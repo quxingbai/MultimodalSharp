@@ -55,6 +55,7 @@ namespace MultimodalSharp.Helper
         {
             var response = await Http.PostAsync(Url, Content);
             var json = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
             var data = JsonSerializer.Deserialize<ResponseDataType>(json);
             return data;
         }
@@ -69,6 +70,7 @@ namespace MultimodalSharp.Helper
         public static async Task PostStream<ResponseStreamDataType>(HttpClient Http, String Url, HttpContent Content, Action<ResponseStreamDataType> Response)
         {
             var send = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Post, Url) { Content = Content }, HttpCompletionOption.ResponseHeadersRead);
+            send.EnsureSuccessStatusCode();
             var stream = send.Content.ReadAsStream();
             StreamReader reader = new StreamReader(stream);
 

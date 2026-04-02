@@ -11,6 +11,9 @@ namespace MultimodalSharp.Ollama.Models.Entities
     {
         public class OllamaResponseBaseModel
         {
+            public String HttpStateCode { get; set; }
+            public String HttpMessage { get; set; }
+
             [JsonPropertyName("model")]
             public string Model { get; set; }
 
@@ -62,7 +65,7 @@ namespace MultimodalSharp.Ollama.Models.Entities
         public class OllamaEmbedResponseModel : OllamaResponseBaseModel
         {
             [JsonPropertyName("embeddings")]
-            public List<List<float>> Embeddings { get; set; }
+            public float[][] Embeddings { get; set; }
         }
         public class OllamaGenerateResponseModel : OllamaResponseBaseModel
         {

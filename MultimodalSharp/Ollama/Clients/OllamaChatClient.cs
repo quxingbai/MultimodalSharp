@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using static MultimodalSharp.Ollama.Models.Entities.OllamaRequests;
 using static MultimodalSharp.Ollama.Models.Entities.OllamaResponses;
 
-namespace MultimodalSharp.Ollama.Services
+namespace MultimodalSharp.Ollama.Clients
 {
     public class OllamaChatClient : TLLSendBaseClient<OllamaChatRequestModel, OllamaChatResponseModel>, ITTLChatCompletion
     {
@@ -20,7 +20,7 @@ namespace MultimodalSharp.Ollama.Services
         }
 
 
-        public async Task<string> SendMessageAsync(string Message)
+        public async Task<string> RequestMessageAsync(string Message)
         {
             var data = await RequestMessageAsync(new OllamaChatRequestModel()
             {
@@ -36,7 +36,7 @@ namespace MultimodalSharp.Ollama.Services
             return message.Content;
         }
 
-        public async Task SendMessageAsync(string Message, StreamMessageData Response)
+        public async Task RequestMessageAsync(string Message, StreamMessageData Response)
         {
             StringBuilder messageStringB = new();
             string? role = null;
@@ -64,7 +64,7 @@ namespace MultimodalSharp.Ollama.Services
         {
             return ChatMessages;
         }
-        public IEnumerable<OlllamaChatRoleMessage> AppendChatMessage(OlllamaChatRoleMessage Msg)
+        public virtual IEnumerable<OlllamaChatRoleMessage> AppendChatMessage(OlllamaChatRoleMessage Msg)
         {
             ChatMessages.Add(Msg);
             return ChatMessages;

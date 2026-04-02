@@ -15,7 +15,7 @@ namespace MultimodalSharp.Abstractions.Interfaces
         /// <summary>
         /// 发送并等待结果所有一起返回
         /// </summary>
-        public Task<string> SendMessageAsync(string Message);
+        public Task<string> RequestMessageAsync(string Message);
 
         /// <summary>
         /// 发送并返回 但以流的形式
@@ -23,6 +23,6 @@ namespace MultimodalSharp.Abstractions.Interfaces
         /// <param name="Message">发送</param>
         /// <param name="Response">流读出数据就会在这里返回</param>
         /// <returns></returns>
-        public Task SendMessageAsync(string Message, StreamMessageData Response);
+        public Task RequestMessageAsync(string Message, StreamMessageData Response);
     }
 }

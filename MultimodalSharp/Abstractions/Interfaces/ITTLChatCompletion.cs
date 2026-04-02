@@ -12,8 +12,8 @@ namespace MultimodalSharp.Abstractions.Interfaces
     /// </summary>
     internal interface ITTLChatCompletion
     {
-        public Task<string> SendMessageAsync(string Message);
-        public Task SendMessageAsync(string Message, StreamMessageData Response);
+        public Task<string> RequestMessageAsync(string Message);
+        public Task RequestMessageAsync(string Message, StreamMessageData Response);
 
     }
 }

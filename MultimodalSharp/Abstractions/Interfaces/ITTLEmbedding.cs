@@ -11,5 +11,6 @@ namespace MultimodalSharp.Abstractions.Interfaces
     /// </summary>
     internal interface ITTLEmbedding
     {
+        public Task<float[][]> RequestEmbeddingAsync(params string[] Texts);
     }
 }
