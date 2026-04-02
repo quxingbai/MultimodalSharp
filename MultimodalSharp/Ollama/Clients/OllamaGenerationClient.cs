@@ -15,9 +15,9 @@ using static MultimodalSharp.Ollama.Models.Entities.OllamaResponses;
 
 namespace MultimodalSharp.Ollama.Clients
 {
-    public class OllamaTextClient : SendModelBase<OllamaGenerateRequestModel, OllamaGenerateResponseModel>, ITTLTextGeneration
+    public class OllamaGenerationClient : SendModelBase<OllamaGenerateRequestModel, OllamaGenerateResponseModel>, ITTLGeneration
     {
-        public OllamaTextClient(OllamaInitDataModel InitData) : base(InitData.ModelName, InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/generate")
+        public OllamaGenerationClient(OllamaInitDataModel InitData) : base(InitData.ModelName, InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/generate")
         {
         }
         /// <summary>

@@ -25,7 +25,13 @@ namespace MultimodalSharp.Ollama.Clients
 
         public IEnumerable<(string Text, float Similarity)> QueryEmbedingText(float[] VectorData, int TopK)
         {
-            var data= base.QueryVectorDatabaseTopk(VectorData, TopK);
+            var data = base.QueryVectorDatabaseTopk(VectorData, TopK);
+            return data.Select(x => (x.Text, x.Score));
+        }
+
+        public IEnumerable<(string Text, float Similarity)> QueryEmbedingSimilarityText(float[] VectorData, int TopK,float Similarity)
+        {
+            var data = base.QueryVectorDatabase(VectorData);
             return data.Select(x => (x.Text, x.Score));
         }
 

@@ -9,6 +9,59 @@ namespace MultimodalSharp.Ollama.Models.Entities
 {
     public class OllamaResponses
     {
+
+        #region OllamaServices_Tags返回类型
+        public class OllamaServiceTagsResponseModel
+        {
+            public class ModelInfo
+            {
+                [JsonPropertyName("name")]
+                public string Name { get; set; }
+
+                [JsonPropertyName("model")]
+                public string Model { get; set; }
+
+                [JsonPropertyName("modified_at")]
+                public string ModifiedAt { get; set; }
+
+                [JsonPropertyName("size")]
+                public long Size { get; set; }
+
+                [JsonPropertyName("digest")]
+                public string Digest { get; set; }
+
+                [JsonPropertyName("details")]
+                public ModelDetails Details { get; set; }
+            }
+
+            public class ModelDetails
+            {
+                [JsonPropertyName("parent_model")]
+                public string ParentModel { get; set; }
+
+                [JsonPropertyName("format")]
+                public string Format { get; set; }
+
+                [JsonPropertyName("family")]
+                public string Family { get; set; }
+
+                [JsonPropertyName("families")]
+                public List<string> Families { get; set; }
+
+                [JsonPropertyName("parameter_size")]
+                public string ParameterSize { get; set; }
+
+                [JsonPropertyName("quantization_level")]
+                public string QuantizationLevel { get; set; }
+            }
+
+            [JsonPropertyName("models")]
+            public List<ModelInfo> Models { get; set; }
+        }
+
+        #endregion
+
+
         public class OllamaResponseBaseModel
         {
             public String HttpStateCode { get; set; }

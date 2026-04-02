@@ -27,20 +27,24 @@ namespace MultimodalSharp.Helper
         /// <summary>
         /// 做一个Json
         /// </summary>
-        /// <param name="Model">数据源</param>
+        /// <param name="Model">数据源 null则为空字符串</param>
         /// <param name="RemoveNullValue">是否从Json中删掉为Null的属性</param>
-        public static StringContent CreateJsonContent(object Model, bool RemoveNullValue)
+        public static StringContent CreateJsonContent(object? Model, bool RemoveNullValue)
         {
             Dictionary<string, object> d = new();
-            foreach (var i in Model.GetType().GetProperties())
+            string json = "";
+            if (Model != null)
             {
-                var val = i.GetValue(Model);
-                if (val != null)
+                foreach (var i in Model.GetType().GetProperties())
                 {
-                    d.Add(i.Name, val);
+                    var val = i.GetValue(Model);
+                    if (val != null)
+                    {
+                        d.Add(i.Name, val);
+                    }
                 }
+                json = System.Text.Json.JsonSerializer.Serialize(d);
             }
-            string json = System.Text.Json.JsonSerializer.Serialize(d);
             return new StringContent(json, Encoding.UTF8, "application/json");
         }
 
@@ -51,7 +55,7 @@ namespace MultimodalSharp.Helper
         /// <param name="Url">地址</param>
         /// <param name="Content">携带Content</param>
         /// <returns></returns>
-        public static async Task<ResponseDataType> PostData<ResponseDataType>(HttpClient Http,String Url, HttpContent Content)
+        public static async Task<ResponseDataType> PostData<ResponseDataType>(HttpClient Http, String Url, HttpContent Content)
         {
             var response = await Http.PostAsync(Url, Content);
             var json = await response.Content.ReadAsStringAsync();

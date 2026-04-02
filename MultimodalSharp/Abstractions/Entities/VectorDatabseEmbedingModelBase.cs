@@ -51,7 +51,7 @@ namespace MultimodalSharp.Abstractions.Entities
             /// </summary>
             /// <param name="queryVector">向量数据</param>
             /// <param name="similarityThreshold">最小相似度1~0.5</param>
-            public List<VectorDatabaseQueryItem> Query(float[] queryVector, float similarityThreshold = 0.7F)
+            public List<VectorDatabaseQueryItem> Query(float[] queryVector,int topK, float similarityThreshold = 0.7F)
             {
                 var results = new List<VectorDatabaseQueryItem>();
                 foreach (var item in _data)
@@ -64,6 +64,7 @@ namespace MultimodalSharp.Abstractions.Entities
                 }
                 return results
                     .OrderByDescending(x => x.Score)
+                    .Take(topK)
                     .ToList();
             }
             private float CosineSimilarity(float[] a, float[] b)
@@ -92,9 +93,9 @@ namespace MultimodalSharp.Abstractions.Entities
         {
             return _VectorDatabase.Query(queryVector, topK);
         }
-        protected IEnumerable<VectorDatabaseQueryItem> QueryVectorDatabase(float[] queryVector, float similarityThreshold = 0.7F)
+        protected IEnumerable<VectorDatabaseQueryItem> QueryVectorDatabase(float[] queryVector,int topK=5, float similarityThreshold = 0.7F)
         {
-            return _VectorDatabase.Query(queryVector, similarityThreshold);
+            return _VectorDatabase.Query(queryVector,topK, similarityThreshold);
         }
     }
 }

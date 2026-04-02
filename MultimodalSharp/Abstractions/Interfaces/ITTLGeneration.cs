@@ -10,7 +10,7 @@ namespace MultimodalSharp.Abstractions.Interfaces
     /// <summary>
     /// 文本生成接口
     /// </summary>
-    internal interface ITTLTextGeneration
+    internal interface ITTLGeneration
     {
         /// <summary>
         /// 发送并等待结果所有一起返回
