@@ -12,7 +12,7 @@ using static MultimodalSharp.Ollama.Models.Entities.OllamaResponses;
 
 namespace MultimodalSharp.Ollama.Clients
 {
-    public class OllamaChatClient : TLLSendBaseClient<OllamaChatRequestModel, OllamaChatResponseModel>, ITTLChatCompletion
+    public class OllamaChatClient : SendModelBase<OllamaChatRequestModel, OllamaChatResponseModel>, ITTLChatCompletion
     {
         public List<OlllamaChatRoleMessage> ChatMessages = new();
         public OllamaChatClient(OllamaInitDataModel InitData) : base(InitData.ModelName, InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/chat")

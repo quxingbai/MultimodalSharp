@@ -11,22 +11,44 @@ using static MultimodalSharp.Ollama.Models.Entities.OllamaResponses;
 
 namespace MultimodalSharp.Ollama.Clients
 {
-    public class OllamaEmbedClient : TLLSendBaseClient<OllamaEmbedRequestModel, OllamaEmbedResponseModel>,ITTLEmbedding
+    public class OllamaEmbedClient : VectorDatabseEmbedingModelBase<OllamaEmbedRequestModel, OllamaEmbedResponseModel>, ITTLEmbedding
     {
         public OllamaEmbedClient(OllamaInitDataModel InitData) : base(InitData.ModelName, InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/embed")
         {
 
         }
 
+        public void AddEmbedVectorData(string Text, float[] Embedding)
+        {
+            base.AddToVectorDatabase(Text, Embedding);
+        }
+
+        public IEnumerable<(string Text, float Similarity)> QueryEmbedingText(float[] VectorData, int TopK)
+        {
+            var data= base.QueryVectorDatabaseTopk(VectorData, TopK);
+            return data.Select(x => (x.Text, x.Score));
+        }
+
         public async Task<float[][]> RequestEmbeddingAsync(params string[] Texts)
         {
-            var data=await RequestMessageAsync(new OllamaEmbedRequestModel()
+            var data = await RequestMessageAsync(new OllamaEmbedRequestModel()
             {
                 Model = ModelName,
-                Input=Texts
+                Input = Texts
             });
             return data.Embeddings;
         }
 
+        public async Task<float[][]> RequestEmbeddingSaveAsync(params string[] Texts)
+        {
+            var data = await RequestEmbeddingAsync(Texts);
+            for (int i = 0; i < Texts.Length; i++)
+            {
+                var text = Texts[i];
+                var vector= data[i];
+                AddEmbedVectorData(text, vector);
+            }
+            return data;
+        }
     }
 }

@@ -17,7 +17,9 @@ var clientEmbed = new OllamaEmbedClient(new() { HttpClient = new(), ModelName = 
 clientEmbed.RequestEmbeddingAsync("我的电脑是笔记本电脑机械革命旷世").ContinueWith(w=> {
     Console.WriteLine(w.Result);
 });
-
+clientEmbed.RequestEmbeddingAsync("我家前面有一条河").ContinueWith(w => {
+    Console.WriteLine(clientEmbed.);
+});
 
 while (true)
 {
