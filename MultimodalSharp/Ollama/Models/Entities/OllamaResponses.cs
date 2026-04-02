@@ -4,16 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using static MultimodalSharp.Ollama.Models.Entities.OllamaResponses.OllamaServiceTagsResponseModel;
 
 namespace MultimodalSharp.Ollama.Models.Entities
 {
     public class OllamaResponses
     {
 
-        #region OllamaServices_Tags返回类型
+        #region OllamaServices返回类型
         public class OllamaServiceTagsResponseModel
         {
-            public class ModelInfo
+            public class TagModelInfo
             {
                 [JsonPropertyName("name")]
                 public string Name { get; set; }
@@ -56,9 +57,153 @@ namespace MultimodalSharp.Ollama.Models.Entities
             }
 
             [JsonPropertyName("models")]
-            public List<ModelInfo> Models { get; set; }
+            public List<TagModelInfo> Models { get; set; }
         }
+        public class OllamaServiceShowModelResponseModel
+        {
+            public class ShowModelInfo : Dictionary<string, object>
+            {
+                // 通用字段（所有模型都有）
+                [JsonPropertyName("general.architecture")]
+                public string Architecture
+                {
+                    get => GetValue<string>("general.architecture");
+                    set => this["general.architecture"] = value;
+                }
 
+                [JsonPropertyName("general.parameter_count")]
+                public long? ParameterCount
+                {
+                    get => GetValue<long?>("general.parameter_count");
+                    set => this["general.parameter_count"] = value;
+                }
+
+                [JsonPropertyName("general.file_type")]
+                public int? FileType
+                {
+                    get => GetValue<int?>("general.file_type");
+                    set => this["general.file_type"] = value;
+                }
+
+                [JsonPropertyName("general.quantization_version")]
+                public int? QuantizationVersion
+                {
+                    get => GetValue<int?>("general.quantization_version");
+                    set => this["general.quantization_version"] = value;
+                }
+
+                [JsonPropertyName("general.size_label")]
+                public string SizeLabel
+                {
+                    get => GetValue<string>("general.size_label");
+                    set => this["general.size_label"] = value;
+                }
+
+                [JsonPropertyName("general.license")]
+                public string License
+                {
+                    get => GetValue<string>("general.license");
+                    set => this["general.license"] = value;
+                }
+
+                [JsonPropertyName("general.type")]
+                public string ModelType
+                {
+                    get => GetValue<string>("general.type");
+                    set => this["general.type"] = value;
+                }
+
+                [JsonPropertyName("general.basename")]
+                public string Basename
+                {
+                    get => GetValue<string>("general.basename");
+                    set => this["general.basename"] = value;
+                }
+
+                // 便捷方法：获取任意字段
+                public T GetValue<T>(string key, T defaultValue = default)
+                {
+                    if (TryGetValue(key, out var value) && value is T t)
+                        return t;
+
+                    // 尝试类型转换
+                    try
+                    {
+                        if (value != null)
+                            return (T)Convert.ChangeType(value, typeof(T));
+                    }
+                    catch { }
+
+                    return defaultValue;
+                }
+
+                // 架构特定字段的便捷访问（可选）
+                public long? ContextLength
+                {
+                    get
+                    {
+                        return Architecture switch
+                        {
+                            "llama" => GetValue<long?>("llama.context_length"),
+                            "qwen2" => GetValue<long?>("qwen2.context_length"),
+                            "qwen3" => GetValue<long?>("qwen3.context_length"),
+                            "mistral" => GetValue<long?>("mistral.context_length"),
+                            _ => null
+                        };
+                    }
+                }
+
+                public int? EmbeddingLength
+                {
+                    get
+                    {
+                        return Architecture switch
+                        {
+                            "llama" => GetValue<int?>("llama.embedding_length"),
+                            "qwen2" => GetValue<int?>("qwen2.embedding_length"),
+                            "qwen3" => GetValue<int?>("qwen3.embedding_length"),
+                            "mistral" => GetValue<int?>("mistral.embedding_length"),
+                            _ => null
+                        };
+                    }
+                }
+
+                public int? BlockCount
+                {
+                    get
+                    {
+                        return Architecture switch
+                        {
+                            "llama" => GetValue<int?>("llama.block_count"),
+                            "qwen2" => GetValue<int?>("qwen2.block_count"),
+                            "qwen3" => GetValue<int?>("qwen3.block_count"),
+                            "mistral" => GetValue<int?>("mistral.block_count"),
+                            _ => null
+                        };
+                    }
+                }
+            }
+            [JsonPropertyName("modelfile")]
+            public string Modelfile { get; set; }
+
+            [JsonPropertyName("parameters")]
+            public string Parameters { get; set; }
+
+            [JsonPropertyName("template")]
+            public string Template { get; set; }
+
+            [JsonPropertyName("details")]
+            public ModelDetails Details { get; set; }
+
+            [JsonPropertyName("model_info")]
+            public ShowModelInfo ModelInfo { get; set; }
+
+            [JsonPropertyName("license")]
+            public string License { get; set; }
+
+            [JsonPropertyName("capabilities")]
+            public List<string> Capabilities { get; set; }
+        }
         #endregion
 
 

@@ -20,8 +20,11 @@ namespace MultimodalSharp.Ollama.Services
 
         public async Task<OllamaServiceTagsResponseModel> RequestTagsAsync()
         {
-            var data = await base.RequestMessageAsync<OllamaServiceTagsResponseModel, string>(null, _UrlHelper.AppendPath("/api/tags"));
-            return data;
+            return await base.RequestMessageAsync<string, OllamaServiceTagsResponseModel>(null, _UrlHelper.AppendPath("/api/tags"));
+        }
+        public async Task<OllamaServiceShowModelResponseModel> RequestShowAsync(String ModelName)
+        {
+            return await base.RequestMessageAsync<dynamic, OllamaServiceShowModelResponseModel>(new { model = ModelName }, _UrlHelper.AppendPath("/api/show"));
         }
 
     }

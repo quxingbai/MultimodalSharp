@@ -8,22 +8,23 @@ namespace MultimodalSharp.Helper
 {
     public class UrlHelper
     {
-        private String UrlSource {  get; set; }
+        private String UrlSource { get; set; }
         public UrlHelper(string Url)
         {
             Url = Url.Replace('\\', '/');
             if (Url[Url.Length - 1] == '/') Url = Url.Substring(0, Url.Length - 2);
-            this.UrlSource= Url;
+            this.UrlSource = Url;
         }
         public string AppendPath(params string[] Paths)
         {
             StringBuilder sb = new StringBuilder(UrlSource);
             foreach (var path in Paths)
             {
-                sb.Append('/');
-                sb.Append(path.Replace('\\', '/'));
+                var npath = path.Replace('\\', '/');
+                if (npath[0] != '/') sb.Append('/');
+                sb.Append(path);
             }
             return sb.ToString();
-        }   
+        }
     }
 }

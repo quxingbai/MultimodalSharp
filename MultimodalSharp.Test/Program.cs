@@ -38,6 +38,5 @@ var services = new OllamaServices(new() { HttpClient = new(), ServerIP = new IPE
 
 //}
 
-var data = await services.RequestTagsAsync();
-
+var data=await services.RequestShowAsync("deepseek-r1");
 Console.ReadKey();

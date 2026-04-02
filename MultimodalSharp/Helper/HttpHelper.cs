@@ -33,7 +33,10 @@ namespace MultimodalSharp.Helper
         {
             Dictionary<string, object> d = new();
             string json = "";
-            if (Model != null)
+            if (Model == null)
+            {
+            }
+            else if (!IsSimpleType(Model.GetType()))
             {
                 foreach (var i in Model.GetType().GetProperties())
                 {
@@ -45,7 +48,33 @@ namespace MultimodalSharp.Helper
                 }
                 json = System.Text.Json.JsonSerializer.Serialize(d);
             }
+            else
+            {
+                json = Model.ToString();
+            }
             return new StringContent(json, Encoding.UTF8, "application/json");
+
+            bool IsSimpleType(Type type)
+            {
+                // 1. 基础类型和常用简单类型
+                if (type.IsPrimitive || type.IsEnum) return true;
+
+                // 2. 特殊处理的简单类型
+                if (type == typeof(string)) return true;
+                if (type == typeof(decimal)) return true;
+                if (type == typeof(DateTime)) return true;
+                if (type == typeof(DateTimeOffset)) return true;
+                if (type == typeof(TimeSpan)) return true;
+                if (type == typeof(Guid)) return true;
+
+                // 3. 可空类型（Nullable<T>）
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    return IsSimpleType(type.GetGenericArguments()[0]);
+                }
+
+                return false;
+            }
         }
 
         /// <summary>
