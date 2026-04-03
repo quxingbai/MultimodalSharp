@@ -4,8 +4,8 @@ using System.Net;
 HttpClient http = new();
 IPEndPoint ip = new IPEndPoint(IPAddress.Loopback, 12344);
 
-//generation不拥有上下文记录，每次请求都是独立的
-var generation = new OllamaGenerationClient(new() { HttpClient = http, ModelName = "deepseek-r1", ServerIP = ip });
+//generate不拥有上下文记录，每次请求都是独立的
+var generate = new OllamaGenerateClient(new() { HttpClient = http, ModelName = "deepseek-r1", ServerIP = ip });
 
 //chat拥有对话上下文记录
 var chat = new OllamaChatClient(new() { HttpClient = http, ModelName = "deepseek-r1", ServerIP = ip });
@@ -16,20 +16,20 @@ var embed = new OllamaEmbedClient(new() { HttpClient = http, ModelName = "Qwen2.
 //services是模型管理接口，例如查看模型列表
 var services = new OllamaServicesClient(new() { HttpClient = http, ServerIP = ip });
 
-GenerationStreamAsync("你好");
 Console.ReadKey();
 
-
-async Task GenerationAsync(string message)
+//以全文回复方式请求
+async Task GenerateAsync(string message)
 {
-    var response = await generation.RequestMessageAsync(message);
+    var response = await generate.RequestMessageAsync(message);
     Console.WriteLine(response);
 }
-async Task GenerationStreamAsync(string message)
+//以流式回复方式请求
+async Task GenerateStreamAsync(string message)
 {
     Console.WriteLine("流开始");
     Console.WriteLine();
-    await generation.RequestMessageAsync(message, (text, isLast) =>
+    await generate.RequestMessageAsync(message, (text, isLast) =>
    {
        Console.Write(text);
        if (isLast)
@@ -42,11 +42,13 @@ async Task GenerationStreamAsync(string message)
 
 
 
+//以全文回复方式请求
 async Task ChatTextAsync(string message)
 {
     var response = await chat.RequestMessageAsync(message);
     Console.WriteLine(response);
 }
+//以流式回复方式请求
 async Task ChatStreamAsync(string message)
 {
     Console.WriteLine("流开始");

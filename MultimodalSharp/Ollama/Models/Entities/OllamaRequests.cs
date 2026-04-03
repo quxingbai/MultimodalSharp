@@ -75,7 +75,7 @@ namespace MultimodalSharp.Ollama.Models.Entities
             public string System { get; set; }
 
             [JsonPropertyName("context")]
-            public List<int> Context { get; set; }
+            public IEnumerable<int> Context { get; set; }
 
             [JsonPropertyName("template")]
             public string Template { get; set; }
