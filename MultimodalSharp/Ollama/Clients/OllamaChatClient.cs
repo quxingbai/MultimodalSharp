@@ -41,7 +41,7 @@ namespace MultimodalSharp.Ollama.Clients
         /// <summary>
         /// 发文本消息，通过回调实时接收回复文本，自动维护上下文历史
         /// </summary>
-        public async Task RequestMessageAsync(string Message, StreamMessageData Response)
+        public async Task RequestMessageAsync(string Message, StreamMessageData Response, CancellationToken? CancelToekn = null)
         {
             StringBuilder messageStringB = new();
             string? role = null;
@@ -56,7 +56,7 @@ namespace MultimodalSharp.Ollama.Clients
                 if (role == null) role = data.Message.Role;
                 messageStringB.Append(msg);
                 Response(msg, data.Done);
-            });
+            }, CancelToekn);
 
             AppendChatMessage(new() { Role = role, Content = messageStringB.ToString() });
         }
@@ -69,7 +69,7 @@ namespace MultimodalSharp.Ollama.Clients
         /// <summary>
         /// 发送模型消息 流式接收回复文本。需要手动维护上下文
         /// </summary>
-        public async Task RequestMessageAsync(OllamaChatRequestModel RequestModel, Action<OllamaChatResponseModel> Response) => await PostRequestMessageStreamAsync(RequestModel, Response);
+        public async Task RequestMessageAsync(OllamaChatRequestModel RequestModel, Action<OllamaChatResponseModel> Response, CancellationToken? CancelToekn = null) => await PostRequestMessageStreamAsync(RequestModel, Response, CancelToekn);
 
 
         /// <summary>

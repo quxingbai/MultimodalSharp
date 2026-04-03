@@ -39,7 +39,7 @@ namespace MultimodalSharp.Ollama.Clients
         /// 发文本消息 以流式方式接收回复文本
         /// </summary>
         /// <param name="Response">每次收到文本后的回调</param>
-        public async Task RequestMessageAsync(string Message, StreamMessageData Response)
+        public async Task RequestMessageAsync(string Message, StreamMessageData Response, CancellationToken? CancelToekn = null)
         {
             await RequestMessageAsync(new OllamaGenerateRequestModel()
             {
@@ -50,18 +50,18 @@ namespace MultimodalSharp.Ollama.Clients
             }, data =>
             {
                 Response(data.Response, data.Done);
-            });
+            }, CancelToekn);
         }
         /// <summary>
         /// 发文本消息 以流式方式接收回复文本
         /// </summary>
         /// <param name="Response">每次收到文本后的回调</param>
-        public async Task RequestMessageAsync(OllamaGenerateRequestModel RequestModel, Action<OllamaGenerateResponseModel> Response)
+        public async Task RequestMessageAsync(OllamaGenerateRequestModel RequestModel, Action<OllamaGenerateResponseModel> Response, CancellationToken? CancelToekn = null)
         {
             await base.PostRequestMessageStreamAsync(RequestModel, data =>
             {
                 Response(data);
-            });
+            }, CancelToekn);
         }
         /// <summary>
         /// 发文本消息 一次性接收所有回复文本

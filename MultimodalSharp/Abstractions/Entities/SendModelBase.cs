@@ -35,9 +35,9 @@ namespace MultimodalSharp.Abstractions.Entities
         {
             return await HttpHelper.PostData<CusteomResponseDataType>(Http, BaseUrl, HttpHelper.CreateJsonContent(RequestData, true));
         }
-        protected virtual async Task PostRequestMessageStreamAsync(RequestDataType RequestData, Action<ResponseDataType> Response)
+        protected virtual async Task PostRequestMessageStreamAsync(RequestDataType RequestData, Action<ResponseDataType> Response, CancellationToken? CancelToekn = null)
         {
-            await HttpHelper.PostStream(Http, BaseUrl, HttpHelper.CreateJsonContent(RequestData, true), Response);
+            await HttpHelper.PostStream(Http, BaseUrl, HttpHelper.CreateJsonContent(RequestData, true), Response,CancelToekn);
         }
 
         protected virtual async Task<ResponseDataType> GetRequestMessageAsync(RequestDataType RequestData, String BaseUrl)

@@ -22,7 +22,7 @@ namespace MultimodalSharp.Abstractions.Interfaces
         /// <param name="Message">发送</param>
         /// <param name="Response">流读出数据就会在这里返回</param>
         /// <returns></returns
-        public Task RequestMessageAsync(string Message, StreamMessageData Response);
+        public Task RequestMessageAsync(string Message, StreamMessageData Response, CancellationToken? CancelToekn = null);
 
     }
 }

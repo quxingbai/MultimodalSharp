@@ -108,7 +108,7 @@ namespace MultimodalSharp.Helper
         /// <param name="Content">携带Content</param>
         /// <param name="Response">返回回调 ，如果返回true则不继续读取，否则持续读取目标返回的Stream</param>
         /// <returns></returns>
-        public static async Task PostStream<ResponseStreamDataType>(HttpClient Http, String Url, HttpContent Content, Action<ResponseStreamDataType> Response)
+        public static async Task PostStream<ResponseStreamDataType>(HttpClient Http, String Url, HttpContent Content, Action<ResponseStreamDataType> Response,CancellationToken? CancelToekn=null)
         {
             var send = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Post, Url) { Content = Content }, HttpCompletionOption.ResponseHeadersRead);
             send.EnsureSuccessStatusCode();
@@ -117,12 +117,12 @@ namespace MultimodalSharp.Helper
 
             while (true)
             {
+                CancelToekn?.ThrowIfCancellationRequested();
                 var line = reader.ReadLine();
                 if (line == null) break;
                 var model = JsonSerializer.Deserialize<ResponseStreamDataType>(line);
                 Response(model);
             }
-
         }
     }
 
