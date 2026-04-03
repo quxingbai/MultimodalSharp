@@ -1,4 +1,5 @@
-﻿using MultimodalSharp.Abstractions.Entities;
+﻿using Microsoft.Extensions.AI;
+using MultimodalSharp.Abstractions.Entities;
 using MultimodalSharp.Abstractions.Interfaces;
 using MultimodalSharp.Helper;
 using MultimodalSharp.Ollama.Models.Entities;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static MultimodalSharp.Ollama.Models.Entities.OllamaRequests;
 using static MultimodalSharp.Ollama.Models.Entities.OllamaResponses;
+using msAI = Microsoft.Extensions.AI;
 
 namespace MultimodalSharp.Ollama.Clients
 {
@@ -94,6 +96,5 @@ namespace MultimodalSharp.Ollama.Clients
         {
             return ChatMessages.Remove(MessageItem);
         }
-
     }
 }

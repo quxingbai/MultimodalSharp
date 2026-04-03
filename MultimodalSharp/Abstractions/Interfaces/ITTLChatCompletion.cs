@@ -10,7 +10,7 @@ namespace MultimodalSharp.Abstractions.Interfaces
     /// <summary>
     /// 对话补全接口
     /// </summary>
-    internal interface ITTLChatCompletion
+    internal interface ITTLChatCompletion 
     {
         /// <summary>
         /// 发送并等待结果所有一起返回
