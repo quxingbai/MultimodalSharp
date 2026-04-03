@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Ollama\Models\Interfaces\" />
-    <Folder Include="Deepseek\" />
   </ItemGroup>
 
   <ItemGroup>

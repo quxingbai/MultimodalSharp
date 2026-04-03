@@ -14,9 +14,8 @@ using msAI = Microsoft.Extensions.AI;
 
 namespace MultimodalSharp.Ollama.Clients
 {
-    public class OllamaChatClient : SendModelBase<OllamaChatRequestModel, OllamaChatResponseModel>, ITTLChatCompletion
+    public class OllamaChatClient : ChatMessageSendModelBase<OllamaChatRequestModel, OllamaChatResponseModel, OlllamaChatRoleMessage>, ITTLChatCompletion<OlllamaChatRoleMessage>
     {
-        protected List<OlllamaChatRoleMessage> ChatMessages = new();
         public OllamaChatClient(OllamaInitDataModel InitData) : base(InitData.ModelName, InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/chat")
         {
         }
@@ -60,7 +59,7 @@ namespace MultimodalSharp.Ollama.Clients
                 Response(msg, data.Done);
             }, CancelToekn);
 
-            AppendChatMessage(new() { Role = role, Content = messageStringB.ToString() });
+            AppendChatMessage(new OlllamaChatRoleMessage() { Role = role, Content = messageStringB.ToString() });
         }
 
         /// <summary>
@@ -74,27 +73,12 @@ namespace MultimodalSharp.Ollama.Clients
         public async Task RequestMessageAsync(OllamaChatRequestModel RequestModel, Action<OllamaChatResponseModel> Response, CancellationToken? CancelToekn = null) => await PostRequestMessageStreamAsync(RequestModel, Response, CancelToekn);
 
 
-        /// <summary>
-        /// 获取上下文历史
-        /// </summary>
-        public virtual IEnumerable<OlllamaChatRoleMessage> GetChatMessages()
+        public new virtual IEnumerable<OlllamaChatRoleMessage> GetChatMessages()
         {
-            return ChatMessages;
+            return base.GetChatContextMessages();
         }
-        /// <summary>
-        /// 添加到末尾一条上下文消息
-        /// </summary>
-        public virtual IEnumerable<OlllamaChatRoleMessage> AppendChatMessage(OlllamaChatRoleMessage Msg)
-        {
-            ChatMessages.Add(Msg);
-            return ChatMessages;
-        }
-        /// <summary>
-        /// 删除一条上下文消息
-        /// </summary>
-        public virtual bool RemoveChatMessages(OlllamaChatRoleMessage MessageItem)
-        {
-            return ChatMessages.Remove(MessageItem);
-        }
+        public virtual IEnumerable<OlllamaChatRoleMessage> AppendChatMessage(params OlllamaChatRoleMessage[] Msgs)=>base.AppendChatContextMessage(Msgs);
+        public new virtual bool RemoveChatContextMessages(OlllamaChatRoleMessage MessageItem)=>base.RemoveChatContextMessages(MessageItem);
+        public void InitChatMessages(params OlllamaChatRoleMessage[] Msgs)=>base.InitChatContextMessages(Msgs);
     }
 }

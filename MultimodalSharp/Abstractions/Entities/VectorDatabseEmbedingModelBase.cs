@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 
 namespace MultimodalSharp.Abstractions.Entities
 {
+    /// <summary>
+    /// 内部维护一个向量数据库的发送基类，通常用于文本向量数据库模型，提供向量数据库的维护方法和查询方法
+    /// </summary>
+    /// <typeparam name="RequestDataType">发送类型</typeparam>
+    /// <typeparam name="ResponseDataType">返回类型</typeparam>
     public abstract class VectorDatabseEmbedingModelBase<RequestDataType, ResponseDataType> : SendModelBase<RequestDataType, ResponseDataType>
     {
         public record class VectorDatabaseItem(string Text, float[] Vector);

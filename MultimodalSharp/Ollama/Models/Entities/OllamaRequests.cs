@@ -130,10 +130,6 @@ namespace MultimodalSharp.Ollama.Models.Entities
             [JsonPropertyName("keep_alive")]
             //public new string KeepAlive { get; set; } = "5m";
             public new string KeepAlive { get; set; } 
-
-            public OllamaChatRequestModel()
-            {
-            }
         }
     }
 }

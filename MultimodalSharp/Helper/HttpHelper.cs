@@ -31,22 +31,24 @@ namespace MultimodalSharp.Helper
         /// <param name="RemoveNullValue">是否从Json中删掉为Null的属性</param>
         public static StringContent CreateJsonContent(object? Model, bool RemoveNullValue)
         {
-            Dictionary<string, object> d = new();
+            //Dictionary<string, object> d = new();
             string json = "";
             if (Model == null)
             {
             }
             else if (!IsSimpleType(Model.GetType()))
             {
-                foreach (var i in Model.GetType().GetProperties())
+                if (RemoveNullValue)
                 {
-                    var val = i.GetValue(Model);
-                    if (val != null)
+                    json = System.Text.Json.JsonSerializer.Serialize(Model, new JsonSerializerOptions()
                     {
-                        d.Add(i.Name, val);
-                    }
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                    });
                 }
-                json = System.Text.Json.JsonSerializer.Serialize(d);
+                else
+                {
+                    json = JsonSerializer.Serialize(Model);
+                }
             }
             else
             {
@@ -101,28 +103,67 @@ namespace MultimodalSharp.Helper
             return data;
         }
         /// <summary>
-        /// Post数据并以流的形式等待结果返回 适用于流式接口 只要接口一直在返回数据就会一直在Response里返回 直到Response里返回true为止
+        /// Post数据并以流的形式等待结果返回 适用于流式接口
         /// </summary>
         /// <typeparam name="ResponseStreamDataType">返回流数据类型</typeparam>
         /// <param name="Url">地址</param>
         /// <param name="Content">携带Content</param>
         /// <param name="Response">返回回调 ，如果返回true则不继续读取，否则持续读取目标返回的Stream</param>
         /// <returns></returns>
-        public static async Task PostStream<ResponseStreamDataType>(HttpClient Http, String Url, HttpContent Content, Action<ResponseStreamDataType> Response,CancellationToken? CancelToekn=null)
+        public static async Task PostStream<ResponseStreamDataType>(HttpClient Http, String Url, HttpContent Content, Action<ResponseStreamDataType> Response, CancellationToken? CancelToekn = null) => await SendReadStream(Http, new HttpRequestMessage(HttpMethod.Post, Url) { Content = Content }, Response, CancelToekn);
+
+        /// <summary>
+        /// 自定义流式接口的模型转换器 适用于流式接口 
+        /// </summary>
+        public static async Task SendReadStream(HttpClient Http, HttpRequestMessage RequestMessage, Action<string> Response, CancellationToken? CancelToekn = null)
         {
-            var send = await Http.SendAsync(new HttpRequestMessage(HttpMethod.Post, Url) { Content = Content }, HttpCompletionOption.ResponseHeadersRead);
+            var send = await Http.SendAsync(RequestMessage, HttpCompletionOption.ResponseHeadersRead);
             send.EnsureSuccessStatusCode();
             var stream = send.Content.ReadAsStream();
             StreamReader reader = new StreamReader(stream);
-
             while (true)
             {
                 CancelToekn?.ThrowIfCancellationRequested();
                 var line = reader.ReadLine();
                 if (line == null) break;
-                var model = JsonSerializer.Deserialize<ResponseStreamDataType>(line);
-                Response(model);
+                if (line == "") continue;
+                Response(line);
             }
+        }
+        /// <summary>
+        /// 自定义流式接口的模型转换器 
+        /// </summary>
+        public static async Task SendReadStream<ResponseStreamDataType>(HttpClient Http, HttpRequestMessage RequestMessage, Action<ResponseStreamDataType> Response, CancellationToken? CancelToekn = null)
+        {
+            await SendReadStream(Http, RequestMessage, (string line) =>
+            {
+                var data = JsonSerializer.Deserialize<ResponseStreamDataType>(line);
+                if (data != null)
+                {
+                    Response(data);
+                }
+            }, CancelToekn);
+        }
+        /// <summary>
+        /// 自定义流式接口的模型转换器 适用于流式接口 
+        /// </summary>
+        /// <typeparam name="ResponseStreamDataType">返回类型</typeparam>
+        /// <param name="Http">Http</param>
+        /// <param name="RequestMessage">请求消息</param>
+        /// <param name="Response">返回数据</param>
+        /// <param name="CancelToekn">取消</param>
+        /// <param name="ModelConverter">从文本消息转换为Model的手动方式，不提供就用Json的默认序列化</param>
+        /// <returns></returns>
+        public static async Task SendReadStream<ResponseStreamDataType>(HttpClient Http, HttpRequestMessage RequestMessage, Action<ResponseStreamDataType> Response, CancellationToken? CancelToekn = null, Func<string, ResponseStreamDataType> ModelConverter = null)
+        {
+            await SendReadStream(Http, RequestMessage, (string line) =>
+            {
+                var data = ModelConverter == null ? JsonSerializer.Deserialize<ResponseStreamDataType>(line) : ModelConverter(line);
+                if (data != null)
+                {
+                    Response(data);
+                }
+            }, CancelToekn);
         }
     }
 
