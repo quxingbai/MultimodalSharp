@@ -110,30 +110,75 @@ namespace MultimodalSharp.Helper
         /// <param name="Content">携带Content</param>
         /// <param name="Response">返回回调 ，如果返回true则不继续读取，否则持续读取目标返回的Stream</param>
         /// <returns></returns>
-        public static async Task PostStream<ResponseStreamDataType>(HttpClient Http, String Url, HttpContent Content, Action<ResponseStreamDataType> Response, CancellationToken? CancelToekn = null) => await SendReadStream(Http, new HttpRequestMessage(HttpMethod.Post, Url) { Content = Content }, Response, CancelToekn);
+        public static async Task PostStream<ResponseStreamDataType>(HttpClient Http, String Url, HttpContent Content, Action<ResponseStreamDataType> Response, CancellationToken? CancelToken = null) => await SendReadStream(Http, new HttpRequestMessage(HttpMethod.Post, Url) { Content = Content }, Response, CancelToken);
 
+        /// <summary>
+        /// 发送一个自定义Request的流返回请求
+        /// </summary>
+        /// <param name="Http">Http</param>
+        /// <param name="RequestMessage">消息</param>
+        /// <param name="Response">如果是流就一行一行读取返回，如果是整条就直接返回结果</param>
+        /// <param name="Option">ResponseHeadersRead表示行的方式 流读取</param>
+        public static async Task SendRead(HttpClient Http, HttpRequestMessage RequestMessage, Action<string> Response, HttpCompletionOption Option = HttpCompletionOption.ResponseHeadersRead, CancellationToken? CancelToken = null)
+        {
+            var send = await Http.SendAsync(RequestMessage, Option);
+            CancelToken?.ThrowIfCancellationRequested();
+            send.EnsureSuccessStatusCode();
+            //如果是流式接口则以流的形式读取返回结果
+            if (Option == HttpCompletionOption.ResponseHeadersRead)
+            {
+                var stream = send.Content.ReadAsStream();
+                StreamReader reader = new StreamReader(stream);
+                while (true)
+                {
+                    CancelToken?.ThrowIfCancellationRequested();
+                    var line = reader.ReadLine();
+                    if (line == null) break;
+                    if (line == "") continue;
+                    Response(line);
+                }
+            }
+            else
+            {
+                var text = await send.Content.ReadAsStringAsync();
+                CancelToken?.ThrowIfCancellationRequested();
+                Response(text);
+            }
+        }
+        /// <summary>
+        /// 自定义消息读取一条String
+        /// </summary>
+        public static async Task<string> SendReadString(HttpClient Http, HttpRequestMessage RequestMessage, CancellationToken? CancelToken = null)
+        {
+            string result = null;
+            await SendRead(Http, RequestMessage, (string line) =>
+            {
+                result = line;
+            }, HttpCompletionOption.ResponseContentRead, CancelToken);
+            return result;
+        }
+        /// <summary>
+        /// 自定义Http消息读取一条String并转换为Model 适用于一次性返回的接口
+        /// </summary>
+        /// <typeparam name="ResponseModelType"返回类型></typeparam>
+        /// <param name="ModelConverter">转换方式，如果为Null就用序列化方式</param>
+        /// <returns></returns>
+        public static async Task<ResponseModelType?> SendRead<ResponseModelType>(HttpClient Http, HttpRequestMessage RequestMessage, CancellationToken? CancelToken = null, Func<string, ResponseModelType>? ModelConverter = null)
+        {
+            var text = await SendReadString(Http, RequestMessage, CancelToken);
+            return ModelConverter == null ? JsonSerializer.Deserialize<ResponseModelType>(text) : ModelConverter(text);
+        }
         /// <summary>
         /// 自定义流式接口的模型转换器 适用于流式接口 
         /// </summary>
-        public static async Task SendReadStream(HttpClient Http, HttpRequestMessage RequestMessage, Action<string> Response, CancellationToken? CancelToekn = null)
+        public static async Task SendReadStream(HttpClient Http, HttpRequestMessage RequestMessage, Action<string> Response, CancellationToken? CancelToken = null)
         {
-            var send = await Http.SendAsync(RequestMessage, HttpCompletionOption.ResponseHeadersRead);
-            send.EnsureSuccessStatusCode();
-            var stream = send.Content.ReadAsStream();
-            StreamReader reader = new StreamReader(stream);
-            while (true)
-            {
-                CancelToekn?.ThrowIfCancellationRequested();
-                var line = reader.ReadLine();
-                if (line == null) break;
-                if (line == "") continue;
-                Response(line);
-            }
+            await SendRead(Http, RequestMessage, Response, HttpCompletionOption.ResponseHeadersRead, CancelToken);
         }
         /// <summary>
         /// 自定义流式接口的模型转换器 
         /// </summary>
-        public static async Task SendReadStream<ResponseStreamDataType>(HttpClient Http, HttpRequestMessage RequestMessage, Action<ResponseStreamDataType> Response, CancellationToken? CancelToekn = null)
+        public static async Task SendReadStream<ResponseStreamDataType>(HttpClient Http, HttpRequestMessage RequestMessage, Action<ResponseStreamDataType> Response, CancellationToken? CancelToken = null)
         {
             await SendReadStream(Http, RequestMessage, (string line) =>
             {
@@ -142,7 +187,7 @@ namespace MultimodalSharp.Helper
                 {
                     Response(data);
                 }
-            }, CancelToekn);
+            }, CancelToken);
         }
         /// <summary>
         /// 自定义流式接口的模型转换器 适用于流式接口 
@@ -151,10 +196,10 @@ namespace MultimodalSharp.Helper
         /// <param name="Http">Http</param>
         /// <param name="RequestMessage">请求消息</param>
         /// <param name="Response">返回数据</param>
-        /// <param name="CancelToekn">取消</param>
+        /// <param name="CancelToken">取消</param>
         /// <param name="ModelConverter">从文本消息转换为Model的手动方式，不提供就用Json的默认序列化</param>
         /// <returns></returns>
-        public static async Task SendReadStream<ResponseStreamDataType>(HttpClient Http, HttpRequestMessage RequestMessage, Action<ResponseStreamDataType> Response, CancellationToken? CancelToekn = null, Func<string, ResponseStreamDataType> ModelConverter = null)
+        public static async Task SendReadStream<ResponseStreamDataType>(HttpClient Http, HttpRequestMessage RequestMessage, Action<ResponseStreamDataType> Response, CancellationToken? CancelToken = null, Func<string, ResponseStreamDataType> ModelConverter = null)
         {
             await SendReadStream(Http, RequestMessage, (string line) =>
             {
@@ -163,7 +208,7 @@ namespace MultimodalSharp.Helper
                 {
                     Response(data);
                 }
-            }, CancelToekn);
+            }, CancelToken);
         }
     }
 

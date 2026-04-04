@@ -1,5 +1,6 @@
 ﻿using MultimodalSharp.Abstractions.Entities;
 using MultimodalSharp.Abstractions.Interfaces;
+using MultimodalSharp.Deepseek.Helpers;
 using MultimodalSharp.Deepseek.Models;
 using MultimodalSharp.Helper;
 using System;
@@ -12,10 +13,15 @@ using static MultimodalSharp.Deepseek.Models.DeepSeekModels;
 
 namespace MultimodalSharp.Deepseek.Clients
 {
+
+
+    /// <summary>
+    /// Deepseek 网页Chat api
+    /// </summary>
     public class DeepseekWebV1ChatClient : ChatMessageSendModelBase<DeepSeekChatRequestModel, DeepSeekChatResponseModel, DeepSeekChatMessage>, ITTLChatCompletion<DeepSeekChatMessage>
     {
         private String ApiKey { get; set; }
-        public DeepseekWebV1ChatClient(HttpClient Http, String ApiKey, string BaseUrl = "https://api.deepseek.com/chat/completions") : base(null, Http, BaseUrl)
+        public DeepseekWebV1ChatClient(HttpClient Http, String ApiKey, string BaseUrl = "https://api.deepseek.com/chat/completions", String ModelName = "deepseek-chat") : base(ModelName, Http, BaseUrl)
         {
             this.ApiKey = ApiKey;
             Http.DefaultRequestHeaders.Add("Authorization", $"Bearer {ApiKey}");
@@ -27,7 +33,7 @@ namespace MultimodalSharp.Deepseek.Clients
         {
             var data = await RequestMessageAsync(new DeepSeekChatRequestModel
             {
-                Model = "deepseek-chat",
+                Model = ModelName,
                 Messages = AppendChatMessage(new DeepSeekChatMessage
                 {
                     Role = "user",
@@ -48,7 +54,7 @@ namespace MultimodalSharp.Deepseek.Clients
             string role = null;
             await RequestMessageAsync(new DeepSeekChatRequestModel
             {
-                Model = "deepseek-chat",
+                Model = ModelName,
                 Messages = AppendChatMessage(new DeepSeekChatMessage
                 {
                     Role = "user",
@@ -73,7 +79,7 @@ namespace MultimodalSharp.Deepseek.Clients
         /// </summary>
         public async Task RequestMessageAsync(DeepSeekChatRequestModel RequestModel, Action<DeepSeekChatResponseModel> Response, CancellationToken? CancelToken = null)
         {
-            await base.SendReadStream<DeepSeekChatResponseModel>(Http, CreateRequestMessage(RequestModel), (data) =>
+            await base.SendReadStreamAsync<DeepSeekChatResponseModel>(Http, CreateRequestMessage(RequestModel), (data) =>
               {
                   if (data != null) Response(data);
               }, CancelToken, text =>
@@ -91,8 +97,6 @@ namespace MultimodalSharp.Deepseek.Clients
         }
         public async Task<DeepSeekChatResponseModel> RequestMessageAsync(DeepSeekChatRequestModel RequestModel) => await base.PostRequestMessageAsync(RequestModel);
 
-
-
         public IEnumerable<DeepSeekChatMessage> AppendChatMessage(params DeepSeekChatMessage[] Msgs) => base.AppendChatContextMessage(Msgs);
 
         public void InitChatMessages(params DeepSeekChatMessage[] Msg) => base.InitChatContextMessages(Msg);
@@ -102,14 +106,14 @@ namespace MultimodalSharp.Deepseek.Clients
         /// <summary>
         /// 创建一个默认请求
         /// </summary>
-        protected HttpRequestMessage CreateRequestMessage(DeepSeekChatRequestModel RequestModel)
-        {
-            var req = new HttpRequestMessage(HttpMethod.Post, BaseUrl)
-            {
-                Content = HttpHelper.CreateJsonContent(RequestModel, true),
-            };
-            req.Headers.Add("Authorization", $"Bearer {ApiKey}");
-            return req;
-        }
+        protected HttpRequestMessage CreateRequestMessage(DeepSeekChatRequestModel RequestModel) => DeepSeekRequestHelpers.CreateRequestMessage(BaseUrl, ApiKey, HttpMethod.Post, HttpHelper.CreateJsonContent(RequestModel,true));
+        //{
+        //    var req = new HttpRequestMessage(HttpMethod.Post, BaseUrl)
+        //    {
+        //        Content = HttpHelper.CreateJsonContent(RequestModel, true),
+        //    };
+        //    req.Headers.Add("Authorization", $"Bearer {ApiKey}");
+        //    return req;
+        //}
     }
 }

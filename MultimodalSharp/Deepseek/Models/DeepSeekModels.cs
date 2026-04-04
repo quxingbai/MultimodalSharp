@@ -9,6 +9,66 @@ namespace MultimodalSharp.Deepseek.Models
 {
     public class DeepSeekModels
     {
+
+        /// <summary>
+        /// DeepSeek Embedding 请求模型
+        /// </summary>
+        public class DeepSeekEmbeddingRequestModel
+        {
+            [JsonPropertyName("model")]
+            public string Model { get; set; }  // "deepseek-embedding-1", "bge-large", "bge-small"
+
+            [JsonPropertyName("input")]
+            public object Input { get; set; }  // 可以是 string 或 List<string>
+
+            [JsonPropertyName("encoding_format")]
+            public string EncodingFormat { get; set; }  // "float" 或 "base64"，可选，默认float
+        }
+        /// <summary>
+        /// DeepSeek Embedding 响应模型
+        /// </summary>
+        public class DeepSeekEmbeddingResponseModel
+        {
+            [JsonPropertyName("object")]
+            public string Object { get; set; }  // "list"
+
+            [JsonPropertyName("data")]
+            public List<DeepSeekEmbeddingData> Data { get; set; }
+
+            [JsonPropertyName("model")]
+            public string Model { get; set; }
+
+            [JsonPropertyName("usage")]
+            public DeepSeekEmbeddingUsage Usage { get; set; }
+        }
+
+        /// <summary>
+        /// 单个Embedding数据
+        /// </summary>
+        public class DeepSeekEmbeddingData
+        {
+            [JsonPropertyName("object")]
+            public string Object { get; set; }  // "embedding"
+
+            [JsonPropertyName("index")]
+            public int Index { get; set; }
+
+            [JsonPropertyName("embedding")]
+            public float[] Embedding { get; set; }  // 或 float[]，向量数组
+        }
+
+        /// <summary>
+        /// Token使用统计
+        /// </summary>
+        public class DeepSeekEmbeddingUsage
+        {
+            [JsonPropertyName("prompt_tokens")]
+            public int PromptTokens { get; set; }
+
+            [JsonPropertyName("total_tokens")]
+            public int TotalTokens { get; set; }
+        }
+
         /// <summary>
         /// DeepSeek 对话请求模型
         /// </summary>

@@ -58,11 +58,23 @@ namespace MultimodalSharp.Abstractions.Entities
         /// <summary>
         /// 发送一个自定义Request的流返回请求，适用于一些特殊的流式请求场景，比如需要自定义请求头或者请求方法等
         /// </summary>
-        public virtual async Task SendReadStream<ResponseStreamDataType>(HttpClient Http, HttpRequestMessage RequestMessage, Action<ResponseStreamDataType> Response, CancellationToken? CancelToekn = null) => await HttpHelper.SendReadStream(Http, RequestMessage, Response, CancelToekn);
+        public virtual async Task SendReadStreamAsync<ResponseStreamDataType>(HttpClient Http, HttpRequestMessage RequestMessage, Action<ResponseStreamDataType> Response, CancellationToken? CancelToekn = null) => await HttpHelper.SendReadStream(Http, RequestMessage, Response, CancelToekn);
 
         /// <summary>
         /// 发送一个自定义Request的流返回请求，可以自定义流式返回数据的解析方式
         /// </summary>
-        public virtual async Task SendReadStream<ResponseStreamDataType>(HttpClient Http, HttpRequestMessage RequestMessage, Action<ResponseStreamDataType> Response, CancellationToken? CancelToekn = null, Func<string, ResponseStreamDataType> ModelConverter = null) => await HttpHelper.SendReadStream(Http, RequestMessage, Response, CancelToekn, ModelConverter);
+        public virtual async Task SendReadStreamAsync<ResponseStreamDataType>(HttpClient Http, HttpRequestMessage RequestMessage, Action<ResponseStreamDataType> Response, CancellationToken? CancelToekn = null, Func<string, ResponseStreamDataType> ModelConverter = null) => await HttpHelper.SendReadStream(Http, RequestMessage, Response, CancelToekn, ModelConverter);
+
+
+        /// <summary>
+        /// 自定义Request 去请求String返回
+        /// </summary>
+        public virtual async Task<string?> SendReadStringAsync(HttpClient Http, HttpRequestMessage RequestMessage, CancellationToken? CancelToken=null) => await HttpHelper.SendReadString(Http, RequestMessage, CancelToken);
+
+
+        /// <summary>
+        /// 自定义Request 去请求String返回
+        /// </summary>
+        public virtual async Task<ResponseDataType?> SendReadAsync<ResponseDataType>(HttpClient Http, HttpRequestMessage RequestMessage, CancellationToken? CancelToken = null,Func<string,ResponseDataType> ModelConverter=null) => await HttpHelper.SendRead<ResponseDataType>(Http, RequestMessage, CancelToken,ModelConverter);
     }
 }
