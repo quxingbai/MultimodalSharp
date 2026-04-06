@@ -1,4 +1,6 @@
-﻿using MultimodalSharp.Abstractions.Interfaces;
+﻿using Microsoft.VisualBasic;
+using MultimodalSharp.Abstractions.Interfaces;
+using MultimodalSharp.Ollama.Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,15 +31,45 @@ namespace MultimodalSharp.Abstractions.Entities
             return ChatMessages;
         }
         /// <summary>
-        /// 添加到末尾一条上下文消息
+        /// 添加到末尾一条上下文消息，会保存到上下文
         /// </summary>
-        protected virtual IEnumerable<ChatMessageType> AppendChatContextMessage(params ChatMessageType[] Msgs)
+        protected virtual IEnumerable<ChatMessageType> AppendChatContextMessages(params ChatMessageType[] Msgs)
         {
             foreach (var i in Msgs)
             {
                 ChatMessages.Add(i);
             }
             return ChatMessages;
+        }
+        /// <summary>
+        /// 添加到末尾一条上下文消息 但不保存在上下文
+        /// </summary>
+        protected virtual IEnumerable<ChatMessageType> AppendChatContextMessagesNoSave(params ChatMessageType[] Msgs)
+        {
+            List<ChatMessageType> msgs = new();
+            msgs.AddRange(ChatMessages);
+            msgs.AddRange(Msgs);
+            return msgs;
+        }
+
+
+        /// <summary>
+        /// 添加到末尾一条上下文消息，可选择保存
+        /// </summary>
+        /// <param name="UserMessage">用户消息</param>
+        /// <param name="SystemMessage">系统消息</param>
+        /// <param name="SaveUserMessage">是否保存到上自动下文维护</param>
+        /// <param name="SaveSystemMessage">是否把这条系统消息也保存到上下文</param>
+        /// <returns></returns>
+        protected virtual IEnumerable<ChatMessageType> AppendChatContextMessageCanSave(ChatMessageType? UserMessage, ChatMessageType? SystemMessage, bool SaveUserMessage = false, bool SaveSystemMessage = false)
+        {
+            if (SaveUserMessage && UserMessage != null) AppendChatContextMessages(UserMessage);
+            if (SaveSystemMessage && SystemMessage != null) AppendChatContextMessages(SystemMessage);
+            List<ChatMessageType> msgs = new();
+            msgs.AddRange(ChatMessages);
+            if (UserMessage != null) msgs.Add(UserMessage);
+            if (SystemMessage != null) msgs.Add(SystemMessage);
+            return msgs;
         }
         /// <summary>
         /// 删除一条上下文消息
@@ -77,7 +109,7 @@ namespace MultimodalSharp.Abstractions.Entities
         protected virtual void InitChatContextMessages(params ChatMessageType[] Msgs)
         {
             ClearChatContextMessages();
-            AppendChatContextMessage(Msgs);
+            AppendChatContextMessages(Msgs);
         }
     }
 }

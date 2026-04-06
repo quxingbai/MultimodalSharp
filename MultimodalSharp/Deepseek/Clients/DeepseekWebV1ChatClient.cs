@@ -97,7 +97,7 @@ namespace MultimodalSharp.Deepseek.Clients
         }
         public async Task<DeepSeekChatResponseModel> RequestMessageAsync(DeepSeekChatRequestModel RequestModel) => await base.PostRequestMessageAsync(RequestModel);
 
-        public IEnumerable<DeepSeekChatMessage> AppendChatMessage(params DeepSeekChatMessage[] Msgs) => base.AppendChatContextMessage(Msgs);
+        public IEnumerable<DeepSeekChatMessage> AppendChatMessage(params DeepSeekChatMessage[] Msgs) => base.AppendChatContextMessages(Msgs);
 
         public void InitChatMessages(params DeepSeekChatMessage[] Msg) => base.InitChatContextMessages(Msg);
 
@@ -107,6 +107,24 @@ namespace MultimodalSharp.Deepseek.Clients
         /// 创建一个默认请求
         /// </summary>
         protected HttpRequestMessage CreateRequestMessage(DeepSeekChatRequestModel RequestModel) => DeepSeekRequestHelpers.CreateRequestMessage(BaseUrl, ApiKey, HttpMethod.Post, HttpHelper.CreateJsonContent(RequestModel,true));
+
+        public async Task<string> GetCompressedContext()
+        {
+            var data = await RequestMessageAsync(new DeepSeekChatRequestModel
+            {
+                Model = ModelName,
+                Messages = AppendChatContextMessagesNoSave(new()
+                {
+                    Role="user",
+                    Content= "将上面的对话历史压缩成一条上下文快照。不能损失对话内容 尽量无损压缩。"
+                }, new()
+                {
+                    Role = "system",
+                    Content = "你是一个专业的对话摘要助手，擅长从对话中提取关键信息并精炼表达。"
+                })
+            });
+            return data.Choices[0].Message.Content;
+        }
         //{
         //    var req = new HttpRequestMessage(HttpMethod.Post, BaseUrl)
         //    {

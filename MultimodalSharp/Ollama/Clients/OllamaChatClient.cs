@@ -16,8 +16,31 @@ namespace MultimodalSharp.Ollama.Clients
 {
     public class OllamaChatClient : ChatMessageSendModelBase<OllamaChatRequestModel, OllamaChatResponseModel, OlllamaChatRoleMessage>, ITTLChatCompletion<OlllamaChatRoleMessage>
     {
-        public OllamaChatClient(OllamaInitDataModel InitData) : base(InitData.ModelName, InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/chat")
+        private Ollama_Chat_InitDataModel _InitData = null;
+        public String MainSystemMessage { get; protected set; }//这条消息将会被扔到每次的request中作为system的提示
+        public OllamaChatClient(Ollama_Chat_InitDataModel InitData) : base(InitData.ModelName, InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/chat")
         {
+            _InitData = InitData;
+            //this.SystemMessage = InitData.SystemMessage;
+        }
+
+        /// <summary>
+        /// 压缩上下文数据，然后放到MainSystemMessage中，每次发消息都携带此System提示消息
+        /// </summary>
+        /// <param name="CompressTextMessage">压缩后的消息，可以为null 将会自动推理压缩内容</param>
+        public async Task SetCompressContext(String CompressTextMessage = null)
+        {
+            if (CompressTextMessage == null) CompressTextMessage = await GetCompressedContext();
+            MainSystemMessage = CompressTextMessage;
+        }
+        public async Task<string> GetCompressedContext()
+        {
+            var data = await RequestMessageAsync(new OllamaChatRequestModel()
+            {
+                Model = ModelName,
+                Messages = AppendChatContextMessageCanSave(OlllamaChatRoleMessage.CreateUserMessage("将上面的对话历史压缩成一条上下文快照。不能损失对话内容 尽量无损压缩。"), OlllamaChatRoleMessage.CreateSystemMessage("你是一个专业的对话摘要助手，擅长从对话中提取关键信息并精炼表达。"))
+            });
+            return data.Message.Content;
         }
 
 
@@ -29,14 +52,14 @@ namespace MultimodalSharp.Ollama.Clients
             var data = await RequestMessageAsync(new OllamaChatRequestModel()
             {
                 Model = ModelName,
-                Messages = AppendChatMessage(OlllamaChatRoleMessage.CreateUserMessage(Message))
+                Messages = AppendChatContextMessageCanSave(OlllamaChatRoleMessage.CreateUserMessage(Message), MainSystemMessage==null?null:OlllamaChatRoleMessage.CreateSystemMessage(MainSystemMessage),true)
             });
             var message = new OlllamaChatRoleMessage()
             {
                 Role = data.Message.Role,
                 Content = data.Message.Content
             };
-            AppendChatMessage(message);
+            AppendChatContextMessages(message);
             return message.Content;
         }
         /// <summary>
@@ -50,7 +73,7 @@ namespace MultimodalSharp.Ollama.Clients
             {
                 Model = ModelName,
                 Stream = true,
-                Messages = AppendChatMessage(OlllamaChatRoleMessage.CreateUserMessage(Message))
+                Messages = AppendChatContextMessageCanSave(OlllamaChatRoleMessage.CreateUserMessage(Message), MainSystemMessage == null ? null : OlllamaChatRoleMessage.CreateSystemMessage(MainSystemMessage), true)
             }, (data) =>
             {
                 var msg = data.Message.Content;
@@ -59,9 +82,8 @@ namespace MultimodalSharp.Ollama.Clients
                 Response(msg, data.Done);
             }, CancelToekn);
 
-            AppendChatMessage(new OlllamaChatRoleMessage() { Role = role, Content = messageStringB.ToString() });
+            base.AppendChatContextMessages(new OlllamaChatRoleMessage() { Role = role, Content = messageStringB.ToString() });
         }
-
         /// <summary>
         /// 发模型消息 一次性接收所有回复文本。需要手动维护上下文
         /// </summary>
@@ -72,13 +94,5 @@ namespace MultimodalSharp.Ollama.Clients
         /// </summary>
         public async Task RequestMessageAsync(OllamaChatRequestModel RequestModel, Action<OllamaChatResponseModel> Response, CancellationToken? CancelToekn = null) => await PostRequestMessageStreamAsync(RequestModel, Response, CancelToekn);
 
-
-        public new virtual IEnumerable<OlllamaChatRoleMessage> GetChatMessages()
-        {
-            return base.GetChatContextMessages();
-        }
-        public virtual IEnumerable<OlllamaChatRoleMessage> AppendChatMessage(params OlllamaChatRoleMessage[] Msgs)=>base.AppendChatContextMessage(Msgs);
-        public new virtual bool RemoveChatContextMessages(OlllamaChatRoleMessage MessageItem)=>base.RemoveChatContextMessages(MessageItem);
-        public void InitChatMessages(params OlllamaChatRoleMessage[] Msgs)=>base.InitChatContextMessages(Msgs);
     }
 }

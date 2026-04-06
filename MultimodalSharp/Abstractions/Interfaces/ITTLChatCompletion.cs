@@ -24,16 +24,8 @@ namespace MultimodalSharp.Abstractions.Interfaces
         /// <returns></returns
         public Task RequestMessageAsync(string Message, StreamMessageData Response, CancellationToken? CancelToekn = null);
         /// <summary>
-        /// 获取上下文历史
+        /// 获取压缩上下文后的数据
         /// </summary>
-        public IEnumerable<ChatMessageType> GetChatMessages();
-        /// <summary>
-        /// 追加上下文
-        /// </summary>
-        public IEnumerable<ChatMessageType> AppendChatMessage(params ChatMessageType[] Msg);
-        /// <summary>
-        /// 初始化上下文
-        /// </summary>
-        public void InitChatMessages(params ChatMessageType[] Msg);
+        public Task<string> GetCompressedContext();
     }
 }

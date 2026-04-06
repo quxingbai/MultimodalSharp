@@ -13,4 +13,9 @@ namespace MultimodalSharp.Ollama.Models.Entities
         public HttpClient HttpClient { get; set; }
         public String ModelName { get; set; }
     }
+    public class Ollama_Chat_InitDataModel: OllamaInitDataModel
+    {
+        public string SystemMessage { get; set; }
+        public long MaxChatMessageSize { get; set; }=1024*1024*50;
+    }
 }
