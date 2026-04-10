@@ -17,7 +17,7 @@ namespace MultimodalSharp.Ollama.Clients
     public class OllamaChatClient : ChatMessageSendModelBase<OllamaChatRequestModel, OllamaChatResponseModel, OlllamaChatRoleMessage>, ITTLChatCompletion<OlllamaChatRoleMessage>
     {
         private Ollama_Chat_InitDataModel _InitData = null;
-        public String MainSystemMessage { get; protected set; }//这条消息将会被扔到每次的request中作为system的提示
+        public GroupTextHelper MainSystemMessage { get; protected set; } = new();//这条消息将会被扔到每次的request中作为system的提示
         public OllamaChatClient(Ollama_Chat_InitDataModel InitData) : base(InitData.ModelName, InitData.HttpClient, $"http://{InitData.ServerIP.Address}:{InitData.ServerIP.Port}/api/chat")
         {
             _InitData = InitData;
@@ -31,7 +31,8 @@ namespace MultimodalSharp.Ollama.Clients
         public async Task SetCompressContext(String CompressTextMessage = null)
         {
             if (CompressTextMessage == null) CompressTextMessage = await GetCompressedContext();
-            MainSystemMessage = CompressTextMessage;
+            MainSystemMessage.SetGroupText("历史上下文快照", CompressTextMessage);
+            //MainSystemMessage = CompressTextMessage;
         }
         public async Task<string> GetCompressedContext()
         {
@@ -52,7 +53,7 @@ namespace MultimodalSharp.Ollama.Clients
             var data = await RequestMessageAsync(new OllamaChatRequestModel()
             {
                 Model = ModelName,
-                Messages = AppendChatContextMessageCanSave(OlllamaChatRoleMessage.CreateUserMessage(Message), MainSystemMessage==null?null:OlllamaChatRoleMessage.CreateSystemMessage(MainSystemMessage),true)
+                Messages = AppendChatContextMessageCanSave(OlllamaChatRoleMessage.CreateUserMessage(Message), MainSystemMessage == null ? null : OlllamaChatRoleMessage.CreateSystemMessage(MainSystemMessage.ToString()), true)
             });
             var message = new OlllamaChatRoleMessage()
             {
@@ -73,7 +74,7 @@ namespace MultimodalSharp.Ollama.Clients
             {
                 Model = ModelName,
                 Stream = true,
-                Messages = AppendChatContextMessageCanSave(OlllamaChatRoleMessage.CreateUserMessage(Message), MainSystemMessage == null ? null : OlllamaChatRoleMessage.CreateSystemMessage(MainSystemMessage), true)
+                Messages = AppendChatContextMessageCanSave(OlllamaChatRoleMessage.CreateUserMessage(Message), MainSystemMessage == null ? null : OlllamaChatRoleMessage.CreateSystemMessage(MainSystemMessage.ToString()), true)
             }, (data) =>
             {
                 var msg = data.Message.Content;

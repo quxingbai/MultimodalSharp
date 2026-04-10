@@ -127,16 +127,19 @@ namespace MultimodalSharp.Helper
             //如果是流式接口则以流的形式读取返回结果
             if (Option == HttpCompletionOption.ResponseHeadersRead)
             {
-                var stream = send.Content.ReadAsStream();
-                StreamReader reader = new StreamReader(stream);
-                while (true)
+                await Task.Run(() =>
                 {
-                    CancelToken?.ThrowIfCancellationRequested();
-                    var line = reader.ReadLine();
-                    if (line == null) break;
-                    if (line == "") continue;
-                    Response(line);
-                }
+                    var stream = send.Content.ReadAsStream();
+                    StreamReader reader = new StreamReader(stream);
+                    while (true)
+                    {
+                        CancelToken?.ThrowIfCancellationRequested();
+                        var line = reader.ReadLine();
+                        if (line == null) break;
+                        if (line == "") continue;
+                        Response(line);
+                    }
+                });
             }
             else
             {

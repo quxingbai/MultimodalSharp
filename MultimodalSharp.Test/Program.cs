@@ -36,7 +36,7 @@ while (true)
     {
         var ctx = await client.GetCompressedContext();
         Console.WriteLine(ctx);
-        //client.SetCompressContext(ctx);
+        client.SetCompressContext(ctx);
     }
     else
     {
