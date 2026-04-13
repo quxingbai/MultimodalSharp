@@ -60,7 +60,7 @@ namespace MultimodalSharp.Ollama.Clients
             {
                 Model = ModelName,
                 Input = Texts
-            });
+            }).ConfigureAwait(false);
             return data.Embeddings;
         }
 
@@ -71,7 +71,7 @@ namespace MultimodalSharp.Ollama.Clients
         /// <returns>根据提供顺序返回</returns>
         public async Task<float[][]> RequestEmbeddingSaveAsync(params string[] Texts)
         {
-            var data = await RequestEmbeddingAsync(Texts);
+            var data = await RequestEmbeddingAsync(Texts).ConfigureAwait(false);
             for (int i = 0; i < Texts.Length; i++)
             {
                 var text = Texts[i];

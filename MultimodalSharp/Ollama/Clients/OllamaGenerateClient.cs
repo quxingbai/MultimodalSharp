@@ -31,7 +31,7 @@ namespace MultimodalSharp.Ollama.Clients
                 Model = ModelName,
                 Prompt = Message,
                 Context = GetContexts(),
-            });
+            }).ConfigureAwait(false);
             return response.Response;
         }
 
@@ -50,7 +50,7 @@ namespace MultimodalSharp.Ollama.Clients
             }, data =>
             {
                 Response(data.Response, data.Done);
-            }, CancelToekn);
+            }, CancelToekn).ConfigureAwait(false);
         }
         /// <summary>
         /// 发文本消息 以流式方式接收回复文本
@@ -61,14 +61,14 @@ namespace MultimodalSharp.Ollama.Clients
             await base.PostRequestMessageStreamAsync(RequestModel, data =>
             {
                 Response(data);
-            }, CancelToekn);
+            }, CancelToekn).ConfigureAwait(false);
         }
         /// <summary>
         /// 发文本消息 一次性接收所有回复文本
         /// </summary>
         public async Task<OllamaGenerateResponseModel> RequestMessageAsync(OllamaGenerateRequestModel RequestModel)
         {
-            var response = await PostRequestMessageAsync(RequestModel);
+            var response = await PostRequestMessageAsync(RequestModel).ConfigureAwait(false);
             return response;
         }
         protected virtual IEnumerable<int> GetContexts()

@@ -88,16 +88,16 @@ namespace MultimodalSharp.Helper
         /// <returns></returns>
         public static async Task<ResponseDataType> PostData<ResponseDataType>(HttpClient Http, String Url, HttpContent Content)
         {
-            var response = await Http.PostAsync(Url, Content);
-            var json = await response.Content.ReadAsStringAsync();
+            var response = await Http.PostAsync(Url, Content).ConfigureAwait(false);
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             var data = JsonSerializer.Deserialize<ResponseDataType>(json);
             return data;
         }
         public static async Task<ResponseDataType> GetData<ResponseDataType>(HttpClient Http, String Url, HttpContent Content)
         {
-            var response = await Http.GetAsync(Url);
-            var json = await response.Content.ReadAsStringAsync();
+            var response = await Http.GetAsync(Url).ConfigureAwait(false);
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             var data = JsonSerializer.Deserialize<ResponseDataType>(json);
             return data;
@@ -121,7 +121,7 @@ namespace MultimodalSharp.Helper
         /// <param name="Option">ResponseHeadersRead表示行的方式 流读取</param>
         public static async Task SendRead(HttpClient Http, HttpRequestMessage RequestMessage, Action<string> Response, HttpCompletionOption Option = HttpCompletionOption.ResponseHeadersRead, CancellationToken? CancelToken = null)
         {
-            var send = await Http.SendAsync(RequestMessage, Option);
+            var send = await Http.SendAsync(RequestMessage, Option).ConfigureAwait(false);
             CancelToken?.ThrowIfCancellationRequested();
             send.EnsureSuccessStatusCode();
             //如果是流式接口则以流的形式读取返回结果
@@ -139,11 +139,11 @@ namespace MultimodalSharp.Helper
                         if (line == "") continue;
                         Response(line);
                     }
-                });
+                }).ConfigureAwait(false);
             }
             else
             {
-                var text = await send.Content.ReadAsStringAsync();
+                var text = await send.Content.ReadAsStringAsync().ConfigureAwait(false);
                 CancelToken?.ThrowIfCancellationRequested();
                 Response(text);
             }
@@ -157,7 +157,7 @@ namespace MultimodalSharp.Helper
             await SendRead(Http, RequestMessage, (string line) =>
             {
                 result = line;
-            }, HttpCompletionOption.ResponseContentRead, CancelToken);
+            }, HttpCompletionOption.ResponseContentRead, CancelToken).ConfigureAwait(false);
             return result;
         }
         /// <summary>
@@ -168,7 +168,7 @@ namespace MultimodalSharp.Helper
         /// <returns></returns>
         public static async Task<ResponseModelType?> SendRead<ResponseModelType>(HttpClient Http, HttpRequestMessage RequestMessage, CancellationToken? CancelToken = null, Func<string, ResponseModelType>? ModelConverter = null)
         {
-            var text = await SendReadString(Http, RequestMessage, CancelToken);
+            var text = await SendReadString(Http, RequestMessage, CancelToken).ConfigureAwait(false);
             return ModelConverter == null ? JsonSerializer.Deserialize<ResponseModelType>(text) : ModelConverter(text);
         }
         /// <summary>
@@ -176,7 +176,7 @@ namespace MultimodalSharp.Helper
         /// </summary>
         public static async Task SendReadStream(HttpClient Http, HttpRequestMessage RequestMessage, Action<string> Response, CancellationToken? CancelToken = null)
         {
-            await SendRead(Http, RequestMessage, Response, HttpCompletionOption.ResponseHeadersRead, CancelToken);
+            await SendRead(Http, RequestMessage, Response, HttpCompletionOption.ResponseHeadersRead, CancelToken).ConfigureAwait(false);
         }
         /// <summary>
         /// 自定义流式接口的模型转换器 
@@ -190,7 +190,7 @@ namespace MultimodalSharp.Helper
                 {
                     Response(data);
                 }
-            }, CancelToken);
+            }, CancelToken).ConfigureAwait(false);
         }
         /// <summary>
         /// 自定义流式接口的模型转换器 适用于流式接口 
@@ -211,7 +211,7 @@ namespace MultimodalSharp.Helper
                 {
                     Response(data);
                 }
-            }, CancelToken);
+            }, CancelToken).ConfigureAwait(false);
         }
     }
 

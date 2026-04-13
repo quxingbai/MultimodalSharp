@@ -40,7 +40,7 @@ namespace MultimodalSharp.Ollama.Clients
             {
                 Model = ModelName,
                 Messages = AppendChatContextMessageCanSave(OlllamaChatRoleMessage.CreateUserMessage("将上面的对话历史压缩成一条上下文快照。不能损失对话内容 尽量无损压缩。"), OlllamaChatRoleMessage.CreateSystemMessage("你是一个专业的对话摘要助手，擅长从对话中提取关键信息并精炼表达。"))
-            });
+            }).ConfigureAwait(false);
             return data.Message.Content;
         }
 
@@ -54,7 +54,7 @@ namespace MultimodalSharp.Ollama.Clients
             {
                 Model = ModelName,
                 Messages = AppendChatContextMessageCanSave(OlllamaChatRoleMessage.CreateUserMessage(Message), MainSystemMessage == null ? null : OlllamaChatRoleMessage.CreateSystemMessage(MainSystemMessage.ToString()), true)
-            });
+            }).ConfigureAwait(false);
             var message = new OlllamaChatRoleMessage()
             {
                 Role = data.Message.Role,
@@ -81,19 +81,19 @@ namespace MultimodalSharp.Ollama.Clients
                 if (role == null) role = data.Message.Role;
                 messageStringB.Append(msg);
                 Response(msg, data.Done);
-            }, CancelToekn);
+            }, CancelToekn).ConfigureAwait(false);
 
             base.AppendChatContextMessages(new OlllamaChatRoleMessage() { Role = role, Content = messageStringB.ToString() });
         }
         /// <summary>
         /// 发模型消息 一次性接收所有回复文本。需要手动维护上下文
         /// </summary>
-        public async Task<OllamaChatResponseModel> RequestMessageAsync(OllamaChatRequestModel RequestModel) => await PostRequestMessageAsync(RequestModel);
+        public async Task<OllamaChatResponseModel> RequestMessageAsync(OllamaChatRequestModel RequestModel) => await PostRequestMessageAsync(RequestModel).ConfigureAwait(false);
 
         /// <summary>
         /// 发送模型消息 流式接收回复文本。需要手动维护上下文
         /// </summary>
-        public async Task RequestMessageAsync(OllamaChatRequestModel RequestModel, Action<OllamaChatResponseModel> Response, CancellationToken? CancelToekn = null) => await PostRequestMessageStreamAsync(RequestModel, Response, CancelToekn);
+        public async Task RequestMessageAsync(OllamaChatRequestModel RequestModel, Action<OllamaChatResponseModel> Response, CancellationToken? CancelToekn = null) => await PostRequestMessageStreamAsync(RequestModel, Response, CancelToekn).ConfigureAwait(false);
 
     }
 }
